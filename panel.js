@@ -23,12 +23,14 @@ let ctxTargetId  = null;
 //   DevTools 嵌入面板 — chrome.devtools 可用，tabId 直接读取
 //   独立侧栏 (Side Panel) — chrome.devtools 不可用，需从 tabs API 获取 tabId
 // ══════════════════════════════════════════════════════════════════
-const IS_DEVTOOLS = typeof chrome.devtools !== 'undefined';
+const HAS_CHROME  = typeof chrome !== 'undefined' && !!chrome.runtime;
+const IS_DEVTOOLS = HAS_CHROME && typeof chrome.devtools !== 'undefined';
 
 let bgPort = null;
 let currentTabId = null;
 
 function connectToBackground(tabId) {
+  if (!HAS_CHROME) return;
   if (bgPort) { try { bgPort.disconnect(); } catch {} }
   currentTabId = tabId;
   bgPort = chrome.runtime.connect({ name: `ws-panel-${tabId}` });
@@ -44,6 +46,7 @@ function connectToBackground(tabId) {
 }
 
 async function initConnection() {
+  if (!HAS_CHROME) return;
   if (IS_DEVTOOLS) {
     connectToBackground(chrome.devtools.inspectedWindow.tabId);
   } else {
