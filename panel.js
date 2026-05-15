@@ -371,9 +371,7 @@ function buildMsgRow(entry) {
   if (entry.isHb)                badges += '<span class="badge ping">心跳</span>';
   if (rule) badges += `<span class="badge" style="background:${rule.color}22;color:${rule.color}">${esc(rule.name)}</span>`;
 
-  return `<div class="msg-row ${cls}" ${rl} data-id="${entry.id}"
-              onclick="selectMsg(${entry.id})"
-              oncontextmenu="openCtx(event,${entry.id})">
+  return `<div class="msg-row ${cls}" ${rl} data-id="${entry.id}">
     <span class="dir ${dc}">${dir}</span>
     <span class="ts">${fmtTs(entry.ts)}</span>
     <span class="prev">${esc(prev)}</span>
@@ -382,7 +380,7 @@ function buildMsgRow(entry) {
     <span class="row-acts">
       <button class="pin-btn ${entry.pinned?'pinned':''}"
               title="${entry.pinned?'取消置顶':'置顶'}"
-              onclick="event.stopPropagation();togglePin(${entry.id})">📌</button>
+              data-pin="${entry.id}">📌</button>
     </span>
   </div>`;
 }
@@ -412,8 +410,7 @@ function appendEventRow(entry) {
   else label = `✕ 连接错误${src}`;
   const list = document.getElementById('msg-list');
   list.insertAdjacentHTML('beforeend',
-    `<div class="msg-row ${cls}" data-id="${entry.id}"
-          oncontextmenu="openCtx(event,${entry.id})">
+    `<div class="msg-row ${cls}" data-id="${entry.id}">
        <span class="ts">${fmtTs(entry.ts)}</span>
        <span class="prev">${esc(label)}</span>
      </div>`);
@@ -459,7 +456,7 @@ function renderConnTab() {
   if (lTab !== 'conn') return;
   const pane = document.getElementById('conn-tab-content');
   if (conns.size === 0) {
-    pane.innerHTML = '<p class="hint">暂无连接<br><br><button class="btn primary" onclick="openNewConnModal()" style="font-size:12px">＋ 新建连接</button></p>';
+    pane.innerHTML = '<p class="hint">暂无连接<br><br><button class="btn primary" data-action="new-conn" style="font-size:12px">＋ 新建连接</button></p>';
     return;
   }
   let html = '';
@@ -484,12 +481,12 @@ function renderConnTab() {
       // 操作按钮
       html += `<div class="conn-actions">`;
       if (info.status === 'open') {
-        html += `<button class="btn" onclick="setActiveConn('${connId}');switchLeftTab('msg',document.querySelector('.ltab'))">发送消息</button>`;
-        html += `<button class="btn warn" onclick="disconnectConn('${connId}')">断开</button>`;
+        html += `<button class="btn" data-action="set-active" data-connid="${connId}">发送消息</button>`;
+        html += `<button class="btn warn" data-action="disconnect" data-connid="${connId}">断开</button>`;
       } else if (info.status === 'closed' || info.status === 'error') {
-        html += `<button class="btn primary" onclick="reconnectConn('${connId}')">重新连接</button>`;
+        html += `<button class="btn primary" data-action="reconnect" data-connid="${connId}">重新连接</button>`;
       } else if (info.status === 'reconnecting') {
-        html += `<button class="btn warn" onclick="disconnectConn('${connId}')">取消重连</button>`;
+        html += `<button class="btn warn" data-action="disconnect" data-connid="${connId}">取消重连</button>`;
       }
       html += `</div>`;
 
@@ -499,13 +496,13 @@ function renderConnTab() {
         html += `<div class="hb-row">
           <label>心跳：</label>
           <input type="checkbox" title="启用心跳" ${hbOn?'checked':''}
-                 onchange="toggleHb('${connId}',this.checked)">
+                 data-action="toggle-hb" data-connid="${connId}">
           <label>每</label>
           <input type="number" value="${info.cfg.hbInterval||30}" min="1" max="300"
-                 onchange="updateHb('${connId}',this.value,document.getElementById('hbmsg-${connId}').value)">
+                 data-action="hb-interval" data-connid="${connId}" id="hbint-${connId}">
           <label>秒发送</label>
           <input type="text" id="hbmsg-${connId}" value="${esc(info.cfg.hbMsg||'{"type":"ping"}')}"
-                 onchange="updateHb('${connId}',document.querySelector('[onchange*=hbmsg-${connId}]').previousElementSibling.previousElementSibling.previousElementSibling.value,this.value)"
+                 data-action="hb-msg" data-connid="${connId}"
                  style="max-width:160px">
         </div>`;
       }
@@ -772,8 +769,8 @@ function renderRuleList() {
       <span class="rule-item-name">${esc(r.name)}</span>
       <span class="rule-item-match">[${r.matchType}] ${esc(r.matchValue)}</span>
       <input type="checkbox" class="rule-toggle" title="启用/禁用" ${r.enabled?'checked':''}
-             onchange="toggleRule('${r.id}')">
-      <button class="rule-del" onclick="deleteRule('${r.id}')">✕</button>
+             data-action="toggle-rule" data-ruleid="${r.id}">
+      <button class="rule-del" data-action="delete-rule" data-ruleid="${r.id}">✕</button>
     </div>`).join('');
   // 同步新建连接面板的下拉
   const sel = document.getElementById('new-rule-select');
@@ -840,10 +837,10 @@ function renderTplList() {
   if (!el) return;
   if (!templates.length) { el.innerHTML = '<p style="color:#aaa;font-size:12px">暂无模板</p>'; return; }
   el.innerHTML = templates.map((t, i) => `
-    <div class="tpl-item" onclick="useTpl(${i})">
+    <div class="tpl-item" data-idx="${i}">
       <span class="tpl-item-name">${esc(t.name)}</span>
       <span class="tpl-item-prev">${esc(t.content)}</span>
-      <button class="tpl-del" onclick="event.stopPropagation();deleteTpl(${i})">✕</button>
+      <button class="tpl-del" data-action="delete-tpl" data-idx="${i}">✕</button>
     </div>`).join('');
 }
 
@@ -930,9 +927,7 @@ function openTplModal()     { renderTplList();  openModal('modal-tpl'); }
 function openModal(id)  { document.getElementById(id).classList.add('open'); }
 function closeModal(id) { document.getElementById(id).classList.remove('open'); }
 
-document.querySelectorAll('.modal-mask').forEach(m =>
-  m.addEventListener('click', e => { if (e.target === m) m.classList.remove('open'); })
-);
+// modal backdrop click handled in bindUI()
 
 function doConnect() {
   const url = document.getElementById('new-url').value.trim();
@@ -1079,8 +1074,133 @@ function loadDemoData() {
 }
 
 // ══════════════════════════════════════════════════════════════════
+// 事件绑定（CSP 兼容 — 无 inline handler）
+// ══════════════════════════════════════════════════════════════════
+function bindUI() {
+  // 工具栏
+  document.getElementById('clear-btn').addEventListener('click', clearAll);
+  document.getElementById('pause-btn').addEventListener('click', togglePause);
+  document.getElementById('conn-select').addEventListener('change', applyFilter);
+  document.getElementById('filter-input').addEventListener('input', applyFilter);
+  document.getElementById('dir-all').addEventListener('click', function() { setDirFilter('all', this); });
+  document.getElementById('dir-recv').addEventListener('click', function() { setDirFilter('recv', this); });
+  document.getElementById('dir-send').addEventListener('click', function() { setDirFilter('send', this); });
+  document.getElementById('new-conn-btn').addEventListener('click', openNewConnModal);
+  document.getElementById('rules-btn').addEventListener('click', openRulesModal);
+  document.getElementById('tpl-modal-btn').addEventListener('click', openTplModal);
+  document.getElementById('export-btn').addEventListener('click', exportMessages);
+  document.getElementById('demo-btn').addEventListener('click', loadDemoData);
+
+  // 侧栏关闭提示
+  document.getElementById('sidepanel-close').addEventListener('click', function() {
+    document.getElementById('sidepanel-bar').classList.remove('show');
+  });
+
+  // 左栏 tab
+  document.getElementById('ltab-msg').addEventListener('click', function() { switchLeftTab('msg', this); });
+  document.getElementById('ltab-conn').addEventListener('click', function() { switchLeftTab('conn', this); });
+
+  // 置顶清除
+  document.getElementById('clear-pins-btn').addEventListener('click', clearPins);
+
+  // 详情 tab
+  document.getElementById('dtab-decoded').addEventListener('click', function() { switchDTab('decoded', this); });
+  document.getElementById('dtab-raw').addEventListener('click', function() { switchDTab('raw', this); });
+  document.getElementById('dtab-hex').addEventListener('click', function() { switchDTab('hex', this); });
+  document.getElementById('dtab-info').addEventListener('click', function() { switchDTab('info', this); });
+  document.getElementById('copy-btn').addEventListener('click', copyDetail);
+
+  // 发送栏
+  document.getElementById('disconnect-active-btn').addEventListener('click', disconnectActive);
+  document.getElementById('tpl-select').addEventListener('change', loadTpl);
+  document.getElementById('save-tpl-btn').addEventListener('click', saveTpl);
+  document.getElementById('send-btn').addEventListener('click', sendMessage);
+
+  // Modal 通用关闭按钮（data-close="modal-id"）
+  document.querySelectorAll('[data-close]').forEach(function(btn) {
+    btn.addEventListener('click', function() { closeModal(this.dataset.close); });
+  });
+  // Modal 背景点击关闭
+  document.querySelectorAll('.modal-mask').forEach(function(m) {
+    m.addEventListener('click', function(e) { if (e.target === m) m.classList.remove('open'); });
+  });
+
+  // Modal 内部操作按钮
+  document.getElementById('do-connect-btn').addEventListener('click', doConnect);
+  document.getElementById('add-rule-btn').addEventListener('click', addRule);
+  document.getElementById('add-tpl-btn').addEventListener('click', addTpl);
+  document.getElementById('do-save-tpl-btn').addEventListener('click', doSaveTpl);
+
+  // 右键菜单委托
+  document.getElementById('ctx-menu').addEventListener('click', function(e) {
+    var item = e.target.closest('[data-ctx]');
+    if (item) ctxAction(item.dataset.ctx);
+  });
+
+  // 消息列表委托（点击 + 右键 + pin）
+  function msgListDelegate(el) {
+    el.addEventListener('click', function(e) {
+      var pin = e.target.closest('[data-pin]');
+      if (pin) { e.stopPropagation(); togglePin(parseInt(pin.dataset.pin)); return; }
+      var row = e.target.closest('.msg-row[data-id]');
+      if (row) selectMsg(parseInt(row.dataset.id));
+    });
+    el.addEventListener('contextmenu', function(e) {
+      var row = e.target.closest('.msg-row[data-id]');
+      if (row) openCtx(e, parseInt(row.dataset.id));
+    });
+  }
+  msgListDelegate(document.getElementById('msg-list'));
+  msgListDelegate(document.getElementById('pin-rows'));
+
+  // 连接管理委托
+  document.getElementById('conn-tab-content').addEventListener('click', function(e) {
+    var btn = e.target.closest('[data-action]');
+    if (!btn) return;
+    var action = btn.dataset.action;
+    var connId = btn.dataset.connid;
+    if (action === 'new-conn')  { openNewConnModal(); }
+    if (action === 'set-active'){ setActiveConn(connId); switchLeftTab('msg', document.getElementById('ltab-msg')); }
+    if (action === 'disconnect'){ disconnectConn(connId); }
+    if (action === 'reconnect') { reconnectConn(connId); }
+  });
+  document.getElementById('conn-tab-content').addEventListener('change', function(e) {
+    var el = e.target;
+    var action = el.dataset.action;
+    var connId = el.dataset.connid;
+    if (action === 'toggle-hb') { toggleHb(connId, el.checked); }
+    if (action === 'hb-interval') {
+      var msg = document.getElementById('hbmsg-' + connId);
+      updateHb(connId, el.value, msg ? msg.value : '{"type":"ping"}');
+    }
+    if (action === 'hb-msg') {
+      var interval = document.getElementById('hbint-' + connId);
+      updateHb(connId, interval ? interval.value : 30, el.value);
+    }
+  });
+
+  // 规则列表委托
+  document.getElementById('rule-list').addEventListener('change', function(e) {
+    if (e.target.dataset.action === 'toggle-rule') toggleRule(e.target.dataset.ruleid);
+  });
+  document.getElementById('rule-list').addEventListener('click', function(e) {
+    var btn = e.target.closest('[data-action="delete-rule"]');
+    if (btn) deleteRule(btn.dataset.ruleid);
+  });
+
+  // 模板列表委托
+  document.getElementById('tpl-list').addEventListener('click', function(e) {
+    var del = e.target.closest('[data-action="delete-tpl"]');
+    if (del) { e.stopPropagation(); deleteTpl(parseInt(del.dataset.idx)); return; }
+    var item = e.target.closest('.tpl-item[data-idx]');
+    if (item) useTpl(parseInt(item.dataset.idx));
+  });
+}
+
+// ══════════════════════════════════════════════════════════════════
 // 初始化
 // ══════════════════════════════════════════════════════════════════
+bindUI();
 renderRuleList();
 refreshTplSelect();
 updateConnCnt();

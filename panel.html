@@ -51,7 +51,7 @@ body {
 #msg-count { color: #666; font-size: 11px; white-space: nowrap; }
 .sep { width: 1px; height: 16px; background: #ccc; margin: 0 2px; flex-shrink: 0; }
 
-/* ── 侧栏窄屏自适应：宽度 < 560px 时上下堆叠 ──────────────────── */
+/* ── 侧栏提示条 ──────────────────────────────────────────────────── */
 #sidepanel-bar {
   display: none; align-items: center; gap: 6px; flex-shrink: 0;
   padding: 4px 10px; background: #e8f0fe; border-bottom: 1px solid #c5d8f8;
@@ -59,15 +59,14 @@ body {
 }
 #sidepanel-bar.show { display: flex; }
 #sidepanel-bar strong { font-weight: 700; }
-#sidepanel-bar a {
+#sidepanel-close {
   margin-left: auto; font-size: 10px; color: #1a73e8; cursor: pointer;
-  text-decoration: underline;
+  text-decoration: underline; background: none; border: none; font-family: inherit;
 }
 
 /* ── 主布局 ─────────────────────────────────────────────────────── */
 #main { display: flex; flex: 1; overflow: hidden; }
 
-/* 侧栏窄宽时竖向堆叠 */
 @media (max-width: 560px) {
   #main { flex-direction: column; }
   #left-panel { width: 100%; min-width: unset; border-right: none; border-bottom: 1px solid #ddd; max-height: 45vh; }
@@ -108,7 +107,6 @@ body {
 #pin-rows .msg-row { background: #fffde7; }
 #pin-rows .msg-row:hover { background: #fff9c4; }
 
-/* 列表头 */
 #list-header {
   display: flex; align-items: center; padding: 3px 8px;
   background: #f5f5f5; border-bottom: 1px solid #e0e0e0;
@@ -158,7 +156,7 @@ body {
 .row-acts button:hover { background: rgba(0,0,0,.08); }
 .pin-btn.pinned { color: #e8a000 !important; opacity: 1 !important; }
 
-/* ── 连接管理标签页 ──────────────────────────────────────────────── */
+/* ── 连接管理 ───────────────────────────────────────────────────── */
 #conn-tab-content { flex: 1; overflow-y: auto; background: #fff; }
 .conn-card {
   padding: 10px 12px; border-bottom: 1px solid #f0f0f0; transition: background .08s;
@@ -283,7 +281,6 @@ body {
 .form-grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
 .form-grid-3 { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 8px; }
 
-/* 订阅规则 */
 #rule-list { display: flex; flex-direction: column; gap: 5px; }
 .rule-item {
   display: flex; align-items: center; gap: 7px; padding: 7px 10px;
@@ -298,7 +295,6 @@ body {
 .rule-del { background: transparent; border: none; cursor: pointer; color: #ccc; font-size: 14px; padding: 0 2px; flex-shrink: 0; }
 .rule-del:hover { color: #c62828; }
 
-/* 发送模板列表（modal） */
 #tpl-list { display: flex; flex-direction: column; gap: 5px; }
 .tpl-item {
   display: flex; align-items: center; gap: 7px; padding: 7px 10px;
@@ -310,7 +306,6 @@ body {
 .tpl-del { background: transparent; border: none; cursor: pointer; color: #ccc; font-size: 14px; flex-shrink: 0; }
 .tpl-del:hover { color: #c62828; }
 
-/* scrollbar */
 ::-webkit-scrollbar { width: 6px; height: 6px; }
 ::-webkit-scrollbar-track { background: transparent; }
 ::-webkit-scrollbar-thumb { background: #ccc; border-radius: 3px; }
@@ -319,61 +314,52 @@ body {
 </head>
 <body>
 
-<!-- 侧栏模式提示条（DevTools 模式下隐藏） -->
+<!-- 侧栏模式提示条 -->
 <div id="sidepanel-bar">
   <strong>侧栏模式</strong> — 自动跟随当前标签页抓包，切换标签页时数据自动清空
-  <a onclick="document.getElementById('sidepanel-bar').classList.remove('show')">关闭提示</a>
+  <button id="sidepanel-close">关闭提示</button>
 </div>
 
 <!-- ═══════ 工具栏 ═══════════════════════════════════════════════ -->
 <div id="toolbar">
-  <!-- 第一行：过滤控制 -->
   <div id="toolbar-filter">
-    <button class="btn danger" onclick="clearAll()">清空</button>
-    <button class="btn" id="pause-btn" onclick="togglePause()">⏸ 暂停</button>
+    <button class="btn danger" id="clear-btn">清空</button>
+    <button class="btn" id="pause-btn">⏸ 暂停</button>
     <div class="sep"></div>
-    <select id="conn-select" onchange="applyFilter()">
+    <select id="conn-select">
       <option value="">全部连接</option>
     </select>
     <div class="btn-group">
-      <button class="btn on" id="dir-all"  onclick="setDirFilter('all',this)">全部</button>
-      <button class="btn"    id="dir-recv" onclick="setDirFilter('recv',this)">↓ 收</button>
-      <button class="btn"    id="dir-send" onclick="setDirFilter('send',this)">↑ 发</button>
+      <button class="btn on" id="dir-all">全部</button>
+      <button class="btn"    id="dir-recv">↓ 收</button>
+      <button class="btn"    id="dir-send">↑ 发</button>
     </div>
-    <input id="filter-input" type="text" placeholder="过滤消息…" oninput="applyFilter()">
-    <span id="msg-count" style="color:#666;font-size:11px;white-space:nowrap">0 条</span>
+    <input id="filter-input" type="text" placeholder="过滤消息…">
+    <span id="msg-count">0 条</span>
   </div>
-  <!-- 第二行：操作入口 -->
   <div id="toolbar-actions">
-    <button class="btn primary" onclick="openNewConnModal()">＋ 新建连接</button>
-    <button class="btn" onclick="openRulesModal()">⚙ 订阅规则</button>
-    <button class="btn" onclick="openTplModal()">📋 模板</button>
-    <button class="btn" onclick="exportMessages()">⬇ 导出</button>
+    <button class="btn primary" id="new-conn-btn">＋ 新建连接</button>
+    <button class="btn" id="rules-btn">⚙ 订阅规则</button>
+    <button class="btn" id="tpl-modal-btn">📋 模板</button>
+    <button class="btn" id="export-btn">⬇ 导出</button>
     <div style="flex:1"></div>
-    <button class="btn" onclick="loadDemoData()" style="color:#888;border-color:#ddd">示例数据</button>
+    <button class="btn" id="demo-btn" style="color:#888;border-color:#ddd">示例数据</button>
   </div>
 </div>
 
 <!-- ═══════ 主体 ═════════════════════════════════════════════════ -->
 <div id="main">
-
-  <!-- ── 左栏 ──────────────────────────────────────────────────── -->
   <div id="left-panel">
     <div id="left-tabs">
-      <div class="ltab on" onclick="switchLeftTab('msg',this)">
-        消息<span class="badge-cnt" id="tab-msg-cnt">0</span>
-      </div>
-      <div class="ltab" onclick="switchLeftTab('conn',this)">
-        连接<span class="badge-cnt" id="tab-conn-cnt">0</span>
-      </div>
+      <div class="ltab on" id="ltab-msg">消息<span class="badge-cnt" id="tab-msg-cnt">0</span></div>
+      <div class="ltab"    id="ltab-conn">连接<span class="badge-cnt" id="tab-conn-cnt">0</span></div>
     </div>
 
-    <!-- 消息子页 -->
     <div id="msg-tab-pane" style="display:flex;flex-direction:column;flex:1;overflow:hidden">
       <div id="pin-section">
         <div id="pin-header">
-          📌 置顶
-          <button onclick="clearPins()">全部清除</button>
+          <span>📌 置顶</span>
+          <button id="clear-pins-btn">全部清除</button>
         </div>
         <div id="pin-rows"></div>
       </div>
@@ -387,34 +373,29 @@ body {
       <div id="msg-list"></div>
     </div>
 
-    <!-- 连接子页 -->
     <div id="conn-tab-content" style="display:none"></div>
   </div>
 
-  <!-- ── 右侧详情 ───────────────────────────────────────────────── -->
   <div id="detail-panel">
     <div id="detail-tabs">
-      <div class="dtab on" onclick="switchDTab('decoded',this)">解码</div>
-      <div class="dtab" onclick="switchDTab('raw',this)">原始</div>
-      <div class="dtab" onclick="switchDTab('hex',this)">十六进制</div>
-      <div class="dtab" onclick="switchDTab('info',this)">信息</div>
-      <button id="copy-btn" onclick="copyDetail()">📋 复制</button>
+      <div class="dtab on" id="dtab-decoded">解码</div>
+      <div class="dtab"    id="dtab-raw">原始</div>
+      <div class="dtab"    id="dtab-hex">十六进制</div>
+      <div class="dtab"    id="dtab-info">信息</div>
+      <button id="copy-btn">📋 复制</button>
     </div>
     <div id="detail-content"><p class="hint">选择一条消息查看详情</p></div>
 
-    <!-- 发送栏（主动连接） -->
     <div id="send-bar">
       <div id="send-target-info">
         <div class="status-dot" id="send-status-dot"></div>
         <span class="target-url" id="send-target-url">—</span>
-        <button style="font-size:10px;padding:1px 6px;border:1px solid #ccc;border-radius:2px;background:transparent;cursor:pointer;color:#c62828" onclick="disconnectActive()">断开</button>
+        <button id="disconnect-active-btn" style="font-size:10px;padding:1px 6px;border:1px solid #ccc;border-radius:2px;background:transparent;cursor:pointer;color:#c62828">断开</button>
       </div>
       <div id="tpl-bar">
         <label>模板：</label>
-        <select id="tpl-select" onchange="loadTpl()">
-          <option value="">— 选择模板 —</option>
-        </select>
-        <button id="save-tpl-btn" onclick="saveTpl()">另存为模板</button>
+        <select id="tpl-select"><option value="">— 选择模板 —</option></select>
+        <button id="save-tpl-btn">另存为模板</button>
       </div>
       <textarea id="send-input" placeholder='{"type":"ping"}'></textarea>
       <div id="send-row">
@@ -422,27 +403,27 @@ body {
           <option value="text">文本</option>
           <option value="json">JSON（验证）</option>
         </select>
-        <button class="btn primary" id="send-btn" onclick="sendMessage()">发送 ↑</button>
+        <button class="btn primary" id="send-btn">发送 ↑</button>
       </div>
     </div>
   </div>
 </div>
 
-<!-- ══ 右键菜单 ══════════════════════════════════════════════════ -->
+<!-- 右键菜单 -->
 <div id="ctx-menu">
-  <div class="ctx-item" onclick="ctxAction('copy-decoded')">📄 复制解码内容</div>
-  <div class="ctx-item" onclick="ctxAction('copy-raw')">📋 复制原始内容</div>
+  <div class="ctx-item" data-ctx="copy-decoded">📄 复制解码内容</div>
+  <div class="ctx-item" data-ctx="copy-raw">📋 复制原始内容</div>
   <div class="ctx-sep"></div>
-  <div class="ctx-item" onclick="ctxAction('pin')">📌 置顶 / 取消置顶</div>
-  <div class="ctx-item" onclick="ctxAction('resend')">↑ 重发（主动连接）</div>
+  <div class="ctx-item" data-ctx="pin">📌 置顶 / 取消置顶</div>
+  <div class="ctx-item" data-ctx="resend">↑ 重发（主动连接）</div>
   <div class="ctx-sep"></div>
-  <div class="ctx-item danger" onclick="ctxAction('delete')">🗑 删除此消息</div>
+  <div class="ctx-item danger" data-ctx="delete">🗑 删除此消息</div>
 </div>
 
-<!-- ══ 新建连接 Modal ════════════════════════════════════════════ -->
+<!-- 新建连接 Modal -->
 <div class="modal-mask" id="modal-conn">
   <div class="modal-box">
-    <div class="modal-head">🔌 新建 WebSocket 连接 <button onclick="closeModal('modal-conn')">✕</button></div>
+    <div class="modal-head">🔌 新建 WebSocket 连接 <button data-close="modal-conn">✕</button></div>
     <div class="modal-body">
       <div class="form-row">
         <label>WebSocket 地址 <span style="color:#c62828">*</span></label>
@@ -457,56 +438,43 @@ body {
         <label>绑定订阅规则（可选）</label>
         <select id="new-rule-select"><option value="">— 不绑定 —</option></select>
       </div>
-      <!-- 心跳配置 -->
       <div style="border:1px solid #e0e0e0;border-radius:4px;padding:10px;background:#fafafa">
         <div style="font-size:11px;font-weight:700;color:#555;margin-bottom:8px">心跳配置</div>
         <div class="form-grid-3">
-          <div class="form-row">
-            <label>启用心跳</label>
-            <select id="new-hb-enable">
-              <option value="0">禁用</option>
-              <option value="1">启用</option>
-            </select>
+          <div class="form-row"><label>启用心跳</label>
+            <select id="new-hb-enable"><option value="0">禁用</option><option value="1">启用</option></select>
           </div>
-          <div class="form-row">
-            <label>间隔（秒）</label>
+          <div class="form-row"><label>间隔（秒）</label>
             <input id="new-hb-interval" type="number" value="30" min="1" max="300">
           </div>
-          <div class="form-row">
-            <label>报文</label>
+          <div class="form-row"><label>报文</label>
             <input id="new-hb-msg" type="text" value='{"type":"ping"}' style="font-family:'Menlo',monospace">
           </div>
         </div>
       </div>
-      <!-- 重连配置 -->
       <div style="border:1px solid #e0e0e0;border-radius:4px;padding:10px;background:#fafafa">
         <div style="font-size:11px;font-weight:700;color:#555;margin-bottom:8px">自动重连</div>
         <div class="form-grid-2">
-          <div class="form-row">
-            <label>启用自动重连</label>
-            <select id="new-rc-enable">
-              <option value="1">启用</option>
-              <option value="0">禁用</option>
-            </select>
+          <div class="form-row"><label>启用自动重连</label>
+            <select id="new-rc-enable"><option value="1">启用</option><option value="0">禁用</option></select>
           </div>
-          <div class="form-row">
-            <label>最大重连次数</label>
+          <div class="form-row"><label>最大重连次数</label>
             <input id="new-rc-max" type="number" value="5" min="1" max="20">
           </div>
         </div>
       </div>
     </div>
     <div class="modal-foot">
-      <button class="btn" onclick="closeModal('modal-conn')">取消</button>
-      <button class="btn primary" onclick="doConnect()">连接</button>
+      <button class="btn" data-close="modal-conn">取消</button>
+      <button class="btn primary" id="do-connect-btn">连接</button>
     </div>
   </div>
 </div>
 
-<!-- ══ 订阅规则 Modal ═══════════════════════════════════════════ -->
+<!-- 订阅规则 Modal -->
 <div class="modal-mask" id="modal-rules">
   <div class="modal-box" style="width:580px">
-    <div class="modal-head">⚙ 订阅规则 <button onclick="closeModal('modal-rules')">✕</button></div>
+    <div class="modal-head">⚙ 订阅规则 <button data-close="modal-rules">✕</button></div>
     <div class="modal-body">
       <div id="rule-list"></div>
       <details style="margin-top:6px">
@@ -517,8 +485,7 @@ body {
             <div class="form-row"><label>高亮颜色</label><input id="r-color" type="color" value="#ff6d00" style="height:32px;padding:2px 4px"></div>
           </div>
           <div class="form-grid-2">
-            <div class="form-row">
-              <label>匹配方式</label>
+            <div class="form-row"><label>匹配方式</label>
               <select id="r-match-type">
                 <option value="keyword">关键词</option>
                 <option value="regex">正则表达式</option>
@@ -531,18 +498,18 @@ body {
             <label>连接成功后自动发送</label>
             <textarea id="r-auto-send" style="height:56px" placeholder='{"type":"subscribe","channel":"prices"}'></textarea>
           </div>
-          <button class="btn primary" style="align-self:flex-end" onclick="addRule()">添加规则</button>
+          <button class="btn primary" id="add-rule-btn" style="align-self:flex-end">添加规则</button>
         </div>
       </details>
     </div>
-    <div class="modal-foot"><button class="btn primary" onclick="closeModal('modal-rules')">完成</button></div>
+    <div class="modal-foot"><button class="btn primary" data-close="modal-rules">完成</button></div>
   </div>
 </div>
 
-<!-- ══ 发送模板 Modal ═══════════════════════════════════════════ -->
+<!-- 发送模板 Modal -->
 <div class="modal-mask" id="modal-tpl">
   <div class="modal-box" style="width:500px">
-    <div class="modal-head">📋 发送模板 <button onclick="closeModal('modal-tpl')">✕</button></div>
+    <div class="modal-head">📋 发送模板 <button data-close="modal-tpl">✕</button></div>
     <div class="modal-body">
       <div id="tpl-list"></div>
       <details style="margin-top:6px">
@@ -550,24 +517,24 @@ body {
         <div style="margin-top:8px;padding:10px;border:1px solid #e0e0e0;border-radius:4px;background:#fafafa;display:flex;flex-direction:column;gap:8px">
           <div class="form-row"><label>模板名称</label><input id="tpl-name" type="text" placeholder="订阅价格"></div>
           <div class="form-row"><label>内容</label><textarea id="tpl-content" placeholder='{"type":"subscribe","channel":"prices"}'></textarea></div>
-          <button class="btn primary" style="align-self:flex-end" onclick="addTpl()">保存模板</button>
+          <button class="btn primary" id="add-tpl-btn" style="align-self:flex-end">保存模板</button>
         </div>
       </details>
     </div>
-    <div class="modal-foot"><button class="btn primary" onclick="closeModal('modal-tpl')">完成</button></div>
+    <div class="modal-foot"><button class="btn primary" data-close="modal-tpl">完成</button></div>
   </div>
 </div>
 
-<!-- ══ 保存模板命名 Modal ════════════════════════════════════════ -->
+<!-- 保存模板命名 Modal -->
 <div class="modal-mask" id="modal-save-tpl">
   <div class="modal-box" style="width:360px">
-    <div class="modal-head">另存为模板 <button onclick="closeModal('modal-save-tpl')">✕</button></div>
+    <div class="modal-head">另存为模板 <button data-close="modal-save-tpl">✕</button></div>
     <div class="modal-body">
       <div class="form-row"><label>模板名称</label><input id="save-tpl-name" type="text" placeholder="订阅报文"></div>
     </div>
     <div class="modal-foot">
-      <button class="btn" onclick="closeModal('modal-save-tpl')">取消</button>
-      <button class="btn primary" onclick="doSaveTpl()">保存</button>
+      <button class="btn" data-close="modal-save-tpl">取消</button>
+      <button class="btn primary" id="do-save-tpl-btn">保存</button>
     </div>
   </div>
 </div>
