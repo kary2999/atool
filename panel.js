@@ -444,8 +444,9 @@ function switchLeftTab(name, el) {
   lTab = name;
   document.querySelectorAll('.ltab').forEach(t => t.classList.remove('on'));
   el.classList.add('on');
-  document.getElementById('msg-tab-pane').style.display   = name === 'msg'  ? 'flex' : 'none';
+  document.getElementById('msg-tab-pane').style.display     = name === 'msg'  ? 'flex'  : 'none';
   document.getElementById('conn-tab-content').style.display = name === 'conn' ? 'block' : 'none';
+  document.getElementById('sendtab-content').style.display  = name === 'send' ? 'flex'  : 'none';
   if (name === 'conn') renderConnTab();
 }
 
@@ -1073,6 +1074,95 @@ function loadDemoData() {
   updateCount(); updateConnCnt();
 }
 
+
+// ══════════════════════════════════════════════════════════════════
+// 发包 Tab — 独立 WebSocket 客户端
+// ══════════════════════════════════════════════════════════════════
+let _stWs = null;
+let _stAutoTimer = null;
+let _stAutoRunning = false;
+
+function stUpdateUI() {
+  const s = _stWs ? _stWs.readyState : -1;
+  const dot  = document.getElementById('st-status-dot');
+  const txt  = document.getElementById('st-status-text');
+  const btn  = document.getElementById('st-connect-btn');
+  const send = document.getElementById('st-send-btn');
+  const auto = document.getElementById('st-auto-btn');
+
+  if (s === WebSocket.OPEN) {
+    dot.className = 'open'; txt.textContent = '已连接';
+    btn.textContent = '断开连接'; btn.classList.add('connected');
+    send.disabled = false; auto.disabled = false;
+  } else if (s === WebSocket.CONNECTING) {
+    dot.className = 'connecting'; txt.textContent = '连接中…';
+    btn.textContent = '取消'; btn.classList.add('connected');
+    send.disabled = true; auto.disabled = true;
+  } else {
+    dot.className = ''; txt.textContent = '未连接';
+    btn.textContent = '开启连接'; btn.classList.remove('connected');
+    send.disabled = true; auto.disabled = true;
+    stStopAuto();
+  }
+}
+
+function stConnect() {
+  if (_stWs && (_stWs.readyState === WebSocket.OPEN || _stWs.readyState === WebSocket.CONNECTING)) {
+    _stWs.close(); return;
+  }
+  const url = document.getElementById('st-url').value.trim();
+  if (!url) { alert('请输入 WebSocket 地址'); return; }
+  try { _stWs = new WebSocket(url); } catch(e) { alert('地址格式错误: ' + e.message); return; }
+  stUpdateUI();
+  _stWs.onopen  = () => stUpdateUI();
+  _stWs.onclose = () => { stUpdateUI(); };
+  _stWs.onerror = () => { stUpdateUI(); };
+  _stWs.onmessage = async (e) => {
+    if (paused) return;
+    const pl = await serializeData(e.data);
+    await pushMsg({ connId: 'st-direct', url, dir: 'recv', ts: Date.now(), source: 'active', payload: pl });
+  };
+  if (!conns.has('st-direct')) {
+    conns.set('st-direct', { url, type: 'active', status: 'open', ws: null, hbTimer: null, rcTimer: null, rcCount: 0, cfg: {}, stats: { recv: 0, send: 0 } });
+    addConnOption('st-direct', url, 'active');
+  }
+}
+
+function stSend() {
+  if (!_stWs || _stWs.readyState !== WebSocket.OPEN) return;
+  const text = document.getElementById('st-send-input').value;
+  if (!text.trim()) return;
+  _stWs.send(text);
+  const url = document.getElementById('st-url').value.trim();
+  pushMsg({ connId: 'st-direct', url, dir: 'send', ts: Date.now(), source: 'active', payload: { kind: 'text', value: text } });
+  const info = conns.get('st-direct'); if (info) info.stats.send++;
+  if (document.getElementById('st-clear-on-send').checked) {
+    document.getElementById('st-send-input').value = '';
+  }
+}
+
+function stToggleAuto() {
+  if (_stAutoRunning) { stStopAuto(); return; }
+  if (!_stWs || _stWs.readyState !== WebSocket.OPEN) return;
+  const msg = document.getElementById('st-auto-msg').value || 'PING';
+  const sec = parseFloat(document.getElementById('st-auto-interval').value) || 1;
+  _stAutoRunning = true;
+  const btn = document.getElementById('st-auto-btn');
+  btn.textContent = '停止发送'; btn.classList.add('running');
+  const url = document.getElementById('st-url').value.trim();
+  _stAutoTimer = setInterval(() => {
+    if (!_stWs || _stWs.readyState !== WebSocket.OPEN) { stStopAuto(); return; }
+    _stWs.send(msg);
+    pushMsg({ connId: 'st-direct', url, dir: 'send', ts: Date.now(), source: 'active', payload: { kind: 'text', value: msg }, isHb: true });
+  }, sec * 1000);
+}
+
+function stStopAuto() {
+  clearInterval(_stAutoTimer); _stAutoTimer = null; _stAutoRunning = false;
+  const btn = document.getElementById('st-auto-btn');
+  if (btn) { btn.textContent = '开始发送'; btn.classList.remove('running'); }
+}
+
 // ══════════════════════════════════════════════════════════════════
 // 事件绑定（CSP 兼容 — 无 inline handler）
 // ══════════════════════════════════════════════════════════════════
@@ -1090,6 +1180,12 @@ function bindUI() {
   document.getElementById('tpl-modal-btn').addEventListener('click', openTplModal);
   document.getElementById('export-btn').addEventListener('click', exportMessages);
   document.getElementById('demo-btn').addEventListener('click', loadDemoData);
+
+  // 发包 Tab
+  document.getElementById('ltab-send').addEventListener('click', function() { switchLeftTab('send', this); });
+  document.getElementById('st-connect-btn').addEventListener('click', stConnect);
+  document.getElementById('st-send-btn').addEventListener('click', stSend);
+  document.getElementById('st-auto-btn').addEventListener('click', stToggleAuto);
 
   // 侧栏关闭提示
   document.getElementById('sidepanel-close').addEventListener('click', function() {

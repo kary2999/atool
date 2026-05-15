@@ -234,6 +234,80 @@ body {
 #send-btn { margin-left: auto; }
 #send-input:disabled, #send-btn:disabled { opacity: .5; cursor: not-allowed; }
 
+/* ── 发包 Tab ───────────────────────────────────────────────────── */
+#sendtab-content {
+  flex: 1; overflow-y: auto; background: #fff; padding: 10px 12px;
+  display: flex; flex-direction: column; gap: 10px;
+}
+.st-section {
+  border: 1px solid #e8e8e8; border-radius: 4px; overflow: hidden;
+}
+.st-section-head {
+  padding: 5px 10px; background: #f5f5f5; border-bottom: 1px solid #e8e8e8;
+  font-size: 11px; font-weight: 700; color: #444; display: flex;
+  align-items: center; justify-content: space-between;
+}
+.st-section-body { padding: 8px 10px; display: flex; flex-direction: column; gap: 7px; }
+.st-row { display: flex; align-items: center; gap: 6px; }
+.st-row label { font-size: 11px; color: #666; white-space: nowrap; flex-shrink: 0; }
+#st-url {
+  flex: 1; font-size: 11px; font-family: 'Menlo',monospace;
+  border: 1px solid #ccc; border-radius: 3px; padding: 4px 7px; outline: none;
+}
+#st-url:focus { border-color: #1a73e8; }
+#st-connect-btn {
+  padding: 4px 12px; font-size: 11px; font-family: inherit;
+  background: #1a73e8; color: #fff; border: none; border-radius: 3px;
+  cursor: pointer; white-space: nowrap; flex-shrink: 0;
+}
+#st-connect-btn:hover { background: #1557b0; }
+#st-connect-btn.connected { background: #c62828; }
+#st-connect-btn.connected:hover { background: #b71c1c; }
+#st-status {
+  font-size: 10px; display: flex; align-items: center; gap: 5px; color: #888;
+}
+#st-status-dot {
+  width: 7px; height: 7px; border-radius: 50%; background: #bbb; flex-shrink: 0;
+}
+#st-status-dot.open { background: #2e7d32; box-shadow: 0 0 0 2px #c8e6c9; }
+#st-status-dot.connecting { background: #f9a825; animation: pulse .8s infinite; }
+#st-status-dot.error { background: #c62828; }
+.st-auto-row { display: flex; align-items: center; gap: 5px; flex-wrap: wrap; }
+.st-auto-row label { font-size: 11px; color: #555; white-space: nowrap; }
+#st-auto-interval {
+  width: 44px; font-size: 11px; border: 1px solid #ccc; border-radius: 3px;
+  padding: 3px 5px; text-align: center; font-family: inherit;
+}
+#st-auto-msg {
+  flex: 1; min-width: 60px; font-size: 11px; font-family: 'Menlo',monospace;
+  border: 1px solid #ccc; border-radius: 3px; padding: 3px 6px; outline: none;
+}
+#st-auto-msg:focus { border-color: #1a73e8; }
+#st-auto-btn {
+  padding: 3px 10px; font-size: 11px; font-family: inherit;
+  background: #2e7d32; color: #fff; border: none; border-radius: 3px; cursor: pointer;
+  white-space: nowrap; flex-shrink: 0;
+}
+#st-auto-btn:hover { background: #1b5e20; }
+#st-auto-btn.running { background: #e65100; }
+#st-auto-btn.running:hover { background: #bf360c; }
+#st-auto-btn:disabled { opacity: .4; cursor: not-allowed; }
+#st-send-input {
+  width: 100%; height: 72px; resize: vertical;
+  font-family: 'Menlo',monospace; font-size: 11px;
+  border: 1px solid #ccc; border-radius: 3px; padding: 5px 7px; outline: none;
+}
+#st-send-input:focus { border-color: #1a73e8; }
+.st-send-foot { display: flex; align-items: center; gap: 8px; }
+.st-send-foot label { font-size: 11px; color: #555; display: flex; align-items: center; gap: 4px; cursor: pointer; }
+#st-send-btn {
+  margin-left: auto; padding: 4px 16px; font-size: 11px; font-family: inherit;
+  background: #1a73e8; color: #fff; border: none; border-radius: 3px;
+  cursor: pointer; font-weight: 600;
+}
+#st-send-btn:hover { background: #1557b0; }
+#st-send-btn:disabled { opacity: .4; cursor: not-allowed; }
+
 /* ── JSON 高亮 ──────────────────────────────────────────────────── */
 .jk{color:#1a73e8} .js{color:#188038} .jn{color:#c62828} .jb{color:#8000d7}
 
@@ -353,6 +427,7 @@ body {
     <div id="left-tabs">
       <div class="ltab on" id="ltab-msg">消息<span class="badge-cnt" id="tab-msg-cnt">0</span></div>
       <div class="ltab"    id="ltab-conn">连接<span class="badge-cnt" id="tab-conn-cnt">0</span></div>
+      <div class="ltab"    id="ltab-send">发包</div>
     </div>
 
     <div id="msg-tab-pane" style="display:flex;flex-direction:column;flex:1;overflow:hidden">
@@ -374,6 +449,43 @@ body {
     </div>
 
     <div id="conn-tab-content" style="display:none"></div>
+
+    <!-- 发包 Tab -->
+    <div id="sendtab-content" style="display:none">
+      <!-- 连接配置 -->
+      <div class="st-section">
+        <div class="st-section-head">
+          <span>服务器配置</span>
+          <span id="st-status"><span id="st-status-dot"></span><span id="st-status-text">未连接</span></span>
+        </div>
+        <div class="st-section-body">
+          <div class="st-row">
+            <label>服务地址</label>
+            <input id="st-url" type="text" placeholder="wss://example.com/ws">
+            <button id="st-connect-btn">开启连接</button>
+          </div>
+        </div>
+      </div>
+
+      <!-- 自动发包 -->
+      <div class="st-section">
+        <div class="st-section-head">发包设置</div>
+        <div class="st-section-body">
+          <div class="st-auto-row">
+            <label>每隔</label>
+            <input id="st-auto-interval" type="number" value="1" min="0.1" step="0.1">
+            <label>秒发送内容</label>
+            <input id="st-auto-msg" type="text" placeholder="PING">
+            <button id="st-auto-btn" disabled>开始发送</button>
+          </div>
+          <textarea id="st-send-input" placeholder="需要发送到服务端的内容"></textarea>
+          <div class="st-send-foot">
+            <label><input type="checkbox" id="st-clear-on-send"> 发包清空输入</label>
+            <button id="st-send-btn" disabled>发送到服务器</button>
+          </div>
+        </div>
+      </div>
+    </div>
   </div>
 
   <div id="detail-panel">
