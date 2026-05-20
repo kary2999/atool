@@ -718,7 +718,44 @@ function closeCtx() {
 }
 
 document.addEventListener('click', closeCtx);
-document.addEventListener('keydown', e => { if (e.key === 'Escape') closeCtx(); });
+document.addEventListener('keydown', e => {
+  if (e.key === 'Escape') { closeCtx(); return; }
+
+  // Don't intercept when typing in inputs
+  const tag = document.activeElement?.tagName;
+  if (tag === 'INPUT' || tag === 'TEXTAREA' || tag === 'SELECT') return;
+
+  // Up / Down — navigate message list
+  if (e.key === 'ArrowUp' || e.key === 'ArrowDown') {
+    e.preventDefault();
+    const visible = messages.filter(m => !m.isEvent && !m.deleted && isVisible(m));
+    if (!visible.length) return;
+    const curIdx = visible.findIndex(m => m.id === selected);
+    let next;
+    if (e.key === 'ArrowUp') {
+      next = curIdx <= 0 ? visible[0] : visible[curIdx - 1];
+    } else {
+      next = curIdx < 0 || curIdx >= visible.length - 1 ? visible[visible.length - 1] : visible[curIdx + 1];
+    }
+    selectMsg(next.id);
+    // scroll selected row into view
+    const row = document.querySelector(`.msg-row[data-id="${next.id}"]`);
+    row?.scrollIntoView({ block: 'nearest' });
+    return;
+  }
+
+  // Left / Right — cycle detail tabs
+  if (e.key === 'ArrowLeft' || e.key === 'ArrowRight') {
+    e.preventDefault();
+    const tabOrder = ['decoded', 'raw', 'hex', 'info'];
+    const curTab = tabOrder.indexOf(dTab);
+    const next = e.key === 'ArrowLeft'
+      ? tabOrder[(curTab - 1 + tabOrder.length) % tabOrder.length]
+      : tabOrder[(curTab + 1) % tabOrder.length];
+    const el = document.getElementById('dtab-' + next);
+    if (el) switchDTab(next, el);
+  }
+});
 
 // ══════════════════════════════════════════════════════════════════
 // 订阅规则
