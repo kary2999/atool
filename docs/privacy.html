@@ -1,0 +1,144 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Privacy Policy — WS Inspector</title>
+<meta name="description" content="WS Inspector privacy policy. No data collected, 100% local.">
+<style>
+:root {
+  --bg: #0d1117; --bg2: #161b22; --bd: #21262d;
+  --tx: #e2e8f0; --tx2: #8b949e; --acc: #00ff66;
+}
+* { box-sizing: border-box; margin: 0; padding: 0; }
+body { background: var(--bg); color: var(--tx); font-family: -apple-system,'Segoe UI',system-ui,sans-serif; font-size: 15px; line-height: 1.7; }
+a { color: var(--acc); text-decoration: none; }
+a:hover { text-decoration: underline; }
+
+nav {
+  background: #060809; border-bottom: 1px solid var(--bd);
+  display: flex; align-items: center; gap: 16px;
+  padding: 0 40px; height: 52px;
+}
+.nav-back { color: var(--tx2); font-size: 13px; display: flex; align-items: center; gap: 6px; }
+.nav-back:hover { color: var(--tx); text-decoration: none; }
+.nav-logo { font-size: 15px; font-weight: 700; color: var(--tx); }
+.nav-logo span { color: var(--acc); }
+
+.wrap { max-width: 720px; margin: 0 auto; padding: 60px 24px 80px; }
+h1 { font-size: 32px; font-weight: 800; margin-bottom: 8px; }
+.meta { font-size: 13px; color: var(--tx2); margin-bottom: 48px; }
+h2 { font-size: 18px; font-weight: 700; margin: 36px 0 12px; color: var(--acc); }
+p { color: var(--tx2); margin-bottom: 12px; }
+p strong { color: var(--tx); }
+ul { color: var(--tx2); padding-left: 20px; margin-bottom: 12px; }
+ul li { margin-bottom: 6px; }
+
+table { width: 100%; border-collapse: collapse; margin-bottom: 16px; font-size: 13px; }
+th { text-align: left; padding: 8px 12px; background: var(--bg2); color: var(--tx2); font-weight: 600; border: 1px solid var(--bd); }
+td { padding: 8px 12px; border: 1px solid var(--bd); color: var(--tx2); vertical-align: top; }
+td:first-child { color: var(--tx); font-family: monospace; }
+
+.no-banner {
+  background: rgba(0,255,102,.06); border: 1px solid rgba(0,255,102,.25);
+  border-radius: 8px; padding: 20px 24px; margin-bottom: 36px;
+  display: flex; gap: 14px; align-items: flex-start;
+}
+.no-banner-icon { font-size: 28px; flex-shrink: 0; }
+.no-banner p { margin: 0; color: var(--tx); font-size: 15px; }
+.no-banner p strong { color: var(--acc); }
+
+footer {
+  background: #060809; border-top: 1px solid var(--bd);
+  padding: 24px 40px; text-align: center;
+  font-size: 13px; color: var(--tx2);
+}
+footer a { color: var(--tx2); }
+footer a:hover { color: var(--acc); text-decoration: none; }
+</style>
+</head>
+<body>
+
+<nav>
+  <a class="nav-back" href="index.html">← Back</a>
+  <span style="color:var(--bd)">|</span>
+  <span class="nav-logo">⚡ WS <span>Inspector</span></span>
+</nav>
+
+<div class="wrap">
+  <h1>Privacy Policy</h1>
+  <p class="meta">Last updated: 2026-05-20 &nbsp;·&nbsp; Applies to version 1.2.0 and later</p>
+
+  <div class="no-banner">
+    <div class="no-banner-icon">🔒</div>
+    <p><strong>Short version:</strong> WS Inspector collects absolutely no data. Everything stays in your browser. There is no backend, no analytics, and no telemetry of any kind.</p>
+  </div>
+
+  <h2>1. Developer</h2>
+  <p>WS Inspector is an independent open-source project maintained by a solo developer.</p>
+  <p><strong>Contact:</strong> <a href="mailto:kary372022@gmail.com">kary372022@gmail.com</a></p>
+
+  <h2>2. Data We Collect</h2>
+  <p><strong>None.</strong></p>
+  <ul>
+    <li>WS Inspector intercepts and displays WebSocket messages locally inside your browser.</li>
+    <li>All message data exists only in browser memory for the lifetime of the panel.</li>
+    <li>There is no backend server receiving any data from the extension.</li>
+    <li>There is no analytics, crash reporting, or telemetry.</li>
+  </ul>
+
+  <h2>3. Data Stored Locally</h2>
+  <table>
+    <tr>
+      <th>Data</th><th>Purpose</th><th>Where</th>
+    </tr>
+    <tr>
+      <td>WebSocket URLs, frames, direction</td>
+      <td>Displayed in the panel in real time</td>
+      <td>Browser memory only — cleared when panel closes</td>
+    </tr>
+    <tr>
+      <td>Subscription rules, send templates</td>
+      <td>Restored when you reopen the panel</td>
+      <td>Browser localStorage (your device only)</td>
+    </tr>
+  </table>
+
+  <h2>4. When Data Leaves the Browser</h2>
+  <p><strong>Only when you explicitly click "Export JSON"</strong> — this writes the current message log to your local Downloads folder. No data is sent to any server at any point.</p>
+  <p>When you use the "New Connection" feature, the extension establishes a WebSocket connection to an address you type. That outbound connection is your own request to your own target; the extension does not route or log it externally.</p>
+
+  <h2>5. Third-Party Requests</h2>
+  <p>WS Inspector makes <strong>no third-party network requests</strong> of its own — no CDNs, no fonts, no tracking pixels, no error-reporting services.</p>
+
+  <h2>6. Permissions Explained</h2>
+  <table>
+    <tr><th>Permission</th><th>Reason</th></tr>
+    <tr><td>storage</td><td>Save subscription rules and send templates to localStorage</td></tr>
+    <tr><td>sidePanel</td><td>Show the debugger panel in the browser's side panel</td></tr>
+    <tr><td>tabs</td><td>Follow the active tab in Side Panel mode</td></tr>
+    <tr><td>Content scripts on &lt;all_urls&gt;</td><td>Users debug WebSocket on arbitrary sites; the domain can't be predicted in advance</td></tr>
+  </table>
+  <p>Permissions <strong>not</strong> used: <code>webRequest</code>, <code>cookies</code>, <code>history</code>, <code>identity</code>, remote code execution.</p>
+
+  <h2>7. Children</h2>
+  <p>WS Inspector is a developer tool not directed at children. It does not knowingly collect data from anyone.</p>
+
+  <h2>8. Open Source</h2>
+  <p>The complete source code is available at <a href="https://github.com/kary2999/ws-inspector" target="_blank">github.com/kary2999/ws-inspector</a>. Anyone can audit exactly what the extension does.</p>
+
+  <h2>9. Changes to This Policy</h2>
+  <p>If future versions require any new data handling, this document will be updated and the change will be noted in the extension's release notes.</p>
+
+  <h2>10. Contact</h2>
+  <p>Privacy questions or vulnerability reports: <a href="mailto:kary372022@gmail.com">kary372022@gmail.com</a></p>
+</div>
+
+<footer>
+  <a href="index.html">WS Inspector</a> ·
+  <a href="https://github.com/kary2999/ws-inspector" target="_blank">GitHub</a> ·
+  <a href="mailto:kary372022@gmail.com">Contact</a>
+</footer>
+
+</body>
+</html>
