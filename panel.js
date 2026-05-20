@@ -430,23 +430,29 @@ function rerender() {
 function updateCount() {
   const n = messages.filter(e => !e.isEvent && isVisible(e)).length;
   document.getElementById('msg-count').textContent = `${n} / ${messages.length} 条`;
-  document.getElementById('tab-msg-cnt').textContent = n;
+  const badge = document.getElementById('tab-msg-cnt');
+  badge.textContent = n > 0 ? n : '';
+  badge.classList.toggle('has-count', n > 0);
 }
 
 function updateConnCnt() {
-  document.getElementById('tab-conn-cnt').textContent = conns.size;
+  const badge = document.getElementById('tab-conn-cnt');
+  badge.textContent = conns.size > 0 ? conns.size : '';
+  badge.classList.toggle('has-count', conns.size > 0);
 }
 
 // ══════════════════════════════════════════════════════════════════
 // 左栏标签切换
 // ══════════════════════════════════════════════════════════════════
-function switchLeftTab(name, el) {
+function switchLeftTab(name) {
   lTab = name;
-  document.querySelectorAll('.ltab').forEach(t => t.classList.remove('on'));
-  el.classList.add('on');
-  document.getElementById('msg-tab-pane').style.display     = name === 'msg'  ? 'flex'  : 'none';
-  document.getElementById('conn-tab-content').style.display = name === 'conn' ? 'block' : 'none';
-  document.getElementById('sendtab-content').style.display  = name === 'send' ? 'flex'  : 'none';
+  document.querySelectorAll('.nav-item').forEach(t => t.classList.remove('on'));
+  document.getElementById('ltab-' + name).classList.add('on');
+  document.querySelectorAll('.cpane').forEach(p => p.classList.remove('show'));
+  const paneMap = { msg: 'msg-tab-pane', conn: 'conn-tab-content', send: 'sendtab-content', diag: 'diagtab-content' };
+  document.getElementById(paneMap[name]).classList.add('show');
+  const titleMap = { msg: 'MESSAGES', conn: 'CONNECTIONS', send: 'SEND', diag: 'DIAGNOSTICS' };
+  document.getElementById('cpanel-title').textContent = titleMap[name];
   if (name === 'conn') renderConnTab();
 }
 
@@ -712,7 +718,44 @@ function closeCtx() {
 }
 
 document.addEventListener('click', closeCtx);
-document.addEventListener('keydown', e => { if (e.key === 'Escape') closeCtx(); });
+document.addEventListener('keydown', e => {
+  if (e.key === 'Escape') { closeCtx(); return; }
+
+  // Don't intercept when typing in inputs
+  const tag = document.activeElement?.tagName;
+  if (tag === 'INPUT' || tag === 'TEXTAREA' || tag === 'SELECT') return;
+
+  // Up / Down — navigate message list
+  if (e.key === 'ArrowUp' || e.key === 'ArrowDown') {
+    e.preventDefault();
+    const visible = messages.filter(m => !m.isEvent && !m.deleted && isVisible(m));
+    if (!visible.length) return;
+    const curIdx = visible.findIndex(m => m.id === selected);
+    let next;
+    if (e.key === 'ArrowUp') {
+      next = curIdx <= 0 ? visible[0] : visible[curIdx - 1];
+    } else {
+      next = curIdx < 0 || curIdx >= visible.length - 1 ? visible[visible.length - 1] : visible[curIdx + 1];
+    }
+    selectMsg(next.id);
+    // scroll selected row into view
+    const row = document.querySelector(`.msg-row[data-id="${next.id}"]`);
+    row?.scrollIntoView({ block: 'nearest' });
+    return;
+  }
+
+  // Left / Right — cycle detail tabs
+  if (e.key === 'ArrowLeft' || e.key === 'ArrowRight') {
+    e.preventDefault();
+    const tabOrder = ['decoded', 'raw', 'hex', 'info'];
+    const curTab = tabOrder.indexOf(dTab);
+    const next = e.key === 'ArrowLeft'
+      ? tabOrder[(curTab - 1 + tabOrder.length) % tabOrder.length]
+      : tabOrder[(curTab + 1) % tabOrder.length];
+    const el = document.getElementById('dtab-' + next);
+    if (el) switchDTab(next, el);
+  }
+});
 
 // ══════════════════════════════════════════════════════════════════
 // 订阅规则
@@ -878,7 +921,7 @@ function clearAll() {
   filterConn = ''; filterText = ''; filterDir = 'all';
   document.getElementById('conn-select').value = '';
   document.getElementById('filter-input').value = '';
-  document.querySelectorAll('.btn-group .btn').forEach((b,i) => b.classList.toggle('on', i===0));
+  document.querySelectorAll('.tb-dbtn').forEach((b,i) => b.classList.toggle('on', i===0));
   document.getElementById('msg-list').innerHTML = '';
   document.getElementById('pin-rows').innerHTML = '';
   document.getElementById('pin-section').style.display = 'none';
@@ -895,7 +938,7 @@ function togglePause() {
 
 function setDirFilter(dir, el) {
   filterDir = dir;
-  document.querySelectorAll('.btn-group .btn').forEach(b => b.classList.remove('on'));
+  document.querySelectorAll('.tb-dbtn').forEach(b => b.classList.remove('on'));
   el.classList.add('on');
   rerender(); updateCount();
 }
@@ -1164,6 +1207,199 @@ function stStopAuto() {
 }
 
 // ══════════════════════════════════════════════════════════════════
+// 发包 Tab — 本地模板
+// ══════════════════════════════════════════════════════════════════
+let stTemplates = loadStore('ws_st_templates', []);
+
+function renderStTplSelect() {
+  const sel = document.getElementById('st-tpl-select');
+  if (!sel) return;
+  sel.innerHTML = '<option value="">— 选择模板 —</option>' +
+    stTemplates.map((t, i) => `<option value="${i}">${esc(t.name)}</option>`).join('');
+}
+
+function stLoadTpl() {
+  const idx = parseInt(document.getElementById('st-tpl-select').value);
+  if (isNaN(idx)) return;
+  const tpl = stTemplates[idx];
+  if (!tpl) return;
+  document.getElementById('st-send-input').value = tpl.content;
+  if (tpl.url) document.getElementById('st-url').value = tpl.url;
+}
+
+function stSaveTpl() {
+  const content = document.getElementById('st-send-input').value.trim();
+  if (!content) { alert('内容为空，无法保存'); return; }
+  const name = prompt('请输入模板名称：');
+  if (!name || !name.trim()) return;
+  const url = document.getElementById('st-url').value.trim();
+  stTemplates.push({ name: name.trim(), content, url });
+  saveStore('ws_st_templates', stTemplates);
+  renderStTplSelect();
+  const sel = document.getElementById('st-tpl-select');
+  sel.value = String(stTemplates.length - 1);
+}
+
+function stDeleteTpl() {
+  const idx = parseInt(document.getElementById('st-tpl-select').value);
+  if (isNaN(idx)) { alert('请先选择一个模板'); return; }
+  const name = stTemplates[idx]?.name || '';
+  if (!confirm(`确认删除模板"${name}"？`)) return;
+  stTemplates.splice(idx, 1);
+  saveStore('ws_st_templates', stTemplates);
+  renderStTplSelect();
+}
+
+// ══════════════════════════════════════════════════════════════════
+// 诊断 Tab — WSS 连接检测
+// ══════════════════════════════════════════════════════════════════
+const diagHistory = [];
+let _diagWs     = null;
+let _diagTimer  = null;
+let _diagRunning = false;
+
+function diagRun() {
+  if (_diagRunning) return;
+  const url     = document.getElementById('diag-url').value.trim();
+  if (!url) { alert('请输入要检测的地址'); return; }
+  const proto   = document.getElementById('diag-proto').value.trim();
+  const timeout = (parseInt(document.getElementById('diag-timeout').value) || 10) * 1000;
+
+  let hostname;
+  try {
+    const u = new URL(url.replace(/^wss?:\/\//, s => s === 'wss://' ? 'https://' : 'http://'));
+    hostname = u.hostname;
+  } catch { alert('地址格式错误'); return; }
+
+  _diagRunning = true;
+  document.getElementById('diag-run-btn').disabled = true;
+  document.getElementById('diag-current-section').style.display = '';
+  document.getElementById('diag-current-url').textContent = url;
+
+  const steps = [];
+  const t0 = Date.now();
+
+  function addStep(icon, name, msg, timeMs) {
+    steps.push({ icon, name, msg, timeMs });
+    _renderDiagSteps(steps);
+  }
+
+  function replaceLastStep(icon, name, msg, timeMs) {
+    steps[steps.length - 1] = { icon, name, msg, timeMs };
+    _renderDiagSteps(steps);
+  }
+
+  function finish(ok, totalMs, errorMsg) {
+    _diagRunning = false;
+    document.getElementById('diag-run-btn').disabled = false;
+    clearTimeout(_diagTimer);
+    if (_diagWs) { try { _diagWs.close(); } catch {} _diagWs = null; }
+    diagHistory.unshift({ url, ok, totalMs, errorMsg, ts: Date.now() });
+    if (diagHistory.length > 20) diagHistory.pop();
+    _renderDiagHist();
+  }
+
+  function startWsTest(dnsMs) {
+    if (dnsMs !== null) addStep('✓', 'DNS 解析', hostname, dnsMs);
+    const wsStart = Date.now();
+    addStep('⏳', 'WebSocket 握手', '连接中…', null);
+
+    let ws;
+    try {
+      ws = proto ? new WebSocket(url, proto) : new WebSocket(url);
+    } catch (e) {
+      replaceLastStep('✕', 'WebSocket 握手', e.message, Date.now() - wsStart);
+      finish(false, Date.now() - t0, e.message);
+      return;
+    }
+    _diagWs = ws;
+
+    ws.onopen = () => {
+      const dt = Date.now() - wsStart;
+      replaceLastStep('✓', 'WebSocket 握手', `握手成功${ws.protocol ? '，协议: ' + ws.protocol : ''}`, dt);
+      addStep('✅', '检测完成', `总用时 ${Date.now() - t0}ms`, null);
+      finish(true, Date.now() - t0, null);
+    };
+
+    ws.onclose = (e) => {
+      if (!_diagRunning) return;
+      const dt = Date.now() - wsStart;
+      const errMsg = e.reason || (e.code !== 1000 ? `握手失败 (code ${e.code})` : '服务端立即关闭连接');
+      replaceLastStep('✕', 'WebSocket 握手', errMsg, dt);
+      finish(false, Date.now() - t0, errMsg);
+    };
+
+    ws.onerror = () => {};
+  }
+
+  // DNS resolution via chrome.dns if available
+  const dnsStart = Date.now();
+  if (HAS_CHROME && chrome.dns && typeof chrome.dns.resolve === 'function') {
+    addStep('⏳', 'DNS 解析', `解析 ${hostname}…`, null);
+    chrome.dns.resolve(hostname, (info) => {
+      if (chrome.runtime.lastError) {
+        const err = chrome.runtime.lastError.message;
+        replaceLastStep('✕', 'DNS 解析', `${hostname} — ${err}`, Date.now() - dnsStart);
+        finish(false, Date.now() - t0, 'DNS 解析失败: ' + err);
+        return;
+      }
+      replaceLastStep('✓', 'DNS 解析', `${hostname} → ${info?.address || '已解析'}`, Date.now() - dnsStart);
+      startWsTest(null);
+    });
+  } else {
+    startWsTest(null);
+  }
+
+  _diagTimer = setTimeout(() => {
+    if (!_diagRunning) return;
+    if (steps.length && steps[steps.length - 1].icon === '⏳') {
+      replaceLastStep('⏱', steps[steps.length - 1].name, `超时 (${timeout/1000}s)`, Date.now() - t0);
+    }
+    if (_diagWs) { try { _diagWs.close(); } catch {} _diagWs = null; }
+    _diagRunning = false;
+    document.getElementById('diag-run-btn').disabled = false;
+    diagHistory.unshift({ url, ok: false, totalMs: Date.now() - t0, errorMsg: `连接超时 (${timeout/1000}s)`, ts: Date.now() });
+    if (diagHistory.length > 20) diagHistory.pop();
+    _renderDiagHist();
+  }, timeout);
+}
+
+function _renderDiagSteps(steps) {
+  document.getElementById('diag-steps').innerHTML = steps.map(s =>
+    `<div class="diag-step">
+      <span class="diag-step-icon">${s.icon}</span>
+      <span class="diag-step-name">${esc(s.name)}</span>
+      <span class="diag-step-msg">${esc(s.msg || '')}</span>
+      ${s.timeMs !== null && s.timeMs !== undefined ? `<span class="diag-step-time">${s.timeMs}ms</span>` : ''}
+    </div>`
+  ).join('');
+}
+
+function _renderDiagHist() {
+  const el = document.getElementById('diag-hist');
+  if (!diagHistory.length) {
+    el.innerHTML = '<p style="color:#aaa;font-size:11px;text-align:center;padding:10px 0">暂无检测记录</p>';
+    return;
+  }
+  el.innerHTML = diagHistory.map(h =>
+    `<div class="diag-hist-item">
+      <span style="font-size:13px;flex-shrink:0">${h.ok ? '✅' : '❌'}</span>
+      <span class="diag-hist-url" title="${esc(h.url)}">${esc(h.url)}</span>
+      <span class="diag-hist-ms">${h.totalMs}ms</span>
+      <span class="diag-hist-ts">${fmtTs(h.ts)}</span>
+    </div>`
+  ).join('');
+}
+
+function diagClear() {
+  if (_diagRunning) return;
+  diagHistory.length = 0;
+  _renderDiagHist();
+  document.getElementById('diag-current-section').style.display = 'none';
+  document.getElementById('diag-steps').innerHTML = '';
+}
+
+// ══════════════════════════════════════════════════════════════════
 // 事件绑定（CSP 兼容 — 无 inline handler）
 // ══════════════════════════════════════════════════════════════════
 function bindUI() {
@@ -1182,10 +1418,21 @@ function bindUI() {
   document.getElementById('demo-btn').addEventListener('click', loadDemoData);
 
   // 发包 Tab
-  document.getElementById('ltab-send').addEventListener('click', function() { switchLeftTab('send', this); });
+  document.getElementById('ltab-send').addEventListener('click', function() { switchLeftTab('send'); });
   document.getElementById('st-connect-btn').addEventListener('click', stConnect);
   document.getElementById('st-send-btn').addEventListener('click', stSend);
   document.getElementById('st-auto-btn').addEventListener('click', stToggleAuto);
+  document.getElementById('st-tpl-load-btn').addEventListener('click', stLoadTpl);
+  document.getElementById('st-tpl-save-btn').addEventListener('click', stSaveTpl);
+  document.getElementById('st-tpl-del-btn').addEventListener('click', stDeleteTpl);
+
+  // 诊断 Tab
+  document.getElementById('ltab-diag').addEventListener('click', function() { switchLeftTab('diag'); });
+  document.getElementById('diag-run-btn').addEventListener('click', diagRun);
+  document.getElementById('diag-clear-btn').addEventListener('click', diagClear);
+  document.getElementById('diag-url').addEventListener('keydown', function(e) {
+    if (e.key === 'Enter') diagRun();
+  });
 
   // 侧栏关闭提示
   document.getElementById('sidepanel-close').addEventListener('click', function() {
@@ -1193,8 +1440,8 @@ function bindUI() {
   });
 
   // 左栏 tab
-  document.getElementById('ltab-msg').addEventListener('click', function() { switchLeftTab('msg', this); });
-  document.getElementById('ltab-conn').addEventListener('click', function() { switchLeftTab('conn', this); });
+  document.getElementById('ltab-msg').addEventListener('click', function() { switchLeftTab('msg'); });
+  document.getElementById('ltab-conn').addEventListener('click', function() { switchLeftTab('conn'); });
 
   // 置顶清除
   document.getElementById('clear-pins-btn').addEventListener('click', clearPins);
@@ -1256,7 +1503,7 @@ function bindUI() {
     var action = btn.dataset.action;
     var connId = btn.dataset.connid;
     if (action === 'new-conn')  { openNewConnModal(); }
-    if (action === 'set-active'){ setActiveConn(connId); switchLeftTab('msg', document.getElementById('ltab-msg')); }
+    if (action === 'set-active'){ setActiveConn(connId); switchLeftTab('msg'); }
     if (action === 'disconnect'){ disconnectConn(connId); }
     if (action === 'reconnect') { reconnectConn(connId); }
   });
@@ -1299,4 +1546,5 @@ function bindUI() {
 bindUI();
 renderRuleList();
 refreshTplSelect();
+renderStTplSelect();
 updateConnCnt();
