@@ -1,0 +1,37 @@
+name: Release
+
+# 推送 v 开头的 tag（如 v2.0.0）时自动打包并发布 GitHub Release
+on:
+  push:
+    tags:
+      - 'v*'
+
+permissions:
+  contents: write   # 创建 Release 需要写权限
+
+jobs:
+  build-and-release:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: 校验 tag 与 manifest 版本一致
+        run: |
+          TAG="${GITHUB_REF_NAME#v}"
+          MAN=$(grep '"version"' manifest.json | head -1 | sed -E 's/[^0-9.]*([0-9]+\.[0-9]+\.[0-9]+).*/\1/')
+          echo "tag=$TAG  manifest=$MAN"
+          if [ "$TAG" != "$MAN" ]; then
+            echo "::error::tag ($TAG) 与 manifest.json version ($MAN) 不一致，请先同步后再打 tag"
+            exit 1
+          fi
+
+      - name: 打包扩展
+        run: bash scripts/build.sh
+
+      - name: 发布 Release（附带 zip）
+        uses: softprops/action-gh-release@v2
+        with:
+          files: devtoolbox-v*.zip
+          generate_release_notes: true
+          name: DevToolbox ${{ github.ref_name }}
