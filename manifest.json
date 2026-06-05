@@ -1,7 +1,7 @@
 {
   "manifest_version": 3,
   "name": "DevToolbox — WS 检查器 + SQL 工具",
-  "version": "2.0.0",
+  "version": "2.0.1",
   "description": "WebSocket 抓包/解压/调试 + 多语言翻译 SQL 生成与检索 — DevTools 嵌入 & 独立侧栏",
   "permissions": ["storage", "sidePanel"],
   "host_permissions": ["https://translate.googleapis.com/*"],
