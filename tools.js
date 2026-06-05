@@ -200,22 +200,52 @@
     return s;
   }
 
+  // 某 UTC 瞬间在指定时区的偏移（分钟，东八区=+480）
+  function tzOffsetMinutes(instant, tz) {
+    const parts = new Intl.DateTimeFormat('en-US', { timeZone: tz, timeZoneName: 'shortOffset' }).formatToParts(new Date(instant));
+    const name = (parts.find(p => p.type === 'timeZoneName') || {}).value || '';
+    const m = name.match(/(?:GMT|UTC)([+-])(\d{1,2})(?::(\d{2}))?/);
+    if (!m) return 0; // GMT/UTC 无偏移
+    const sign = m[1] === '-' ? -1 : 1;
+    return sign * (parseInt(m[2], 10) * 60 + (m[3] ? parseInt(m[3], 10) : 0));
+  }
+
+  // 把「指定时区的墙上时间」换算为 UTC 瞬间（毫秒）
+  function wallTimeToInstant(y, mo, d, h, mi, s, tz) {
+    const utcGuess = Date.UTC(y, mo - 1, d, h, mi, s);
+    let off = tzOffsetMinutes(utcGuess, tz);
+    let instant = utcGuess - off * 60000;
+    const off2 = tzOffsetMinutes(instant, tz);   // DST 边界二次校正
+    if (off2 !== off) instant = utcGuess - off2 * 60000;
+    return instant;
+  }
+
   function parseTimeInput() {
     const sta = $('time-status');
     const raw = $('time-input').value.trim();
     if (!raw) { sta.className = 'tstatus err'; sta.textContent = '请输入时间戳或日期'; return; }
+    const tz = $('time-tz').value;
 
     let date;
     if (/^\d+$/.test(raw)) {
+      // 纯数字 = 时间戳（绝对瞬间，与时区无关，时区只影响显示）
       const num = parseInt(raw, 10);
-      // 10 位=秒，13 位=毫秒，其余按位数推断
-      if (raw.length <= 10) date = new Date(num * 1000);
-      else if (raw.length <= 13) date = new Date(num);
-      else date = new Date(num);                  // 微秒/纳秒不精确，按毫秒近似
+      if (raw.length <= 10) date = new Date(num * 1000);        // 秒
+      else date = new Date(num);                                 // 毫秒（更长位数按毫秒近似）
     } else {
-      const t = Date.parse(raw.replace(/-/g, '/').replace('T', ' '));
-      if (isNaN(t)) { sta.className = 'tstatus err'; sta.textContent = '无法识别的日期格式'; return; }
-      date = new Date(t);
+      // 日期字符串：按「选中时区」的墙上时间解释
+      const m = raw.match(/^(\d{4})[-/](\d{1,2})[-/](\d{1,2})(?:[ T](\d{1,2}):(\d{1,2})(?::(\d{1,2}))?)?/);
+      if (m) {
+        const instant = wallTimeToInstant(
+          +m[1], +m[2], +m[3], +(m[4] || 0), +(m[5] || 0), +(m[6] || 0), tz
+        );
+        date = new Date(instant);
+      } else {
+        // 兜底：含 Z / 偏移量的 ISO 串本身是绝对时间，交给原生解析
+        const t = Date.parse(raw);
+        if (isNaN(t)) { sta.className = 'tstatus err'; sta.textContent = '无法识别的日期格式'; return; }
+        date = new Date(t);
+      }
     }
     if (isNaN(date.getTime())) { sta.className = 'tstatus err'; sta.textContent = '无效时间'; return; }
 
