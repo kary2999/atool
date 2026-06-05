@@ -118,17 +118,17 @@ body {
   display: flex; flex-direction: column;
   align-items: center; justify-content: center; gap: 3px;
   border-radius: var(--r2); cursor: pointer;
-  color: var(--tx3); transition: all .12s;
+  color: var(--tx2); transition: all .12s;
   border: 1px solid transparent; position: relative;
 }
-.nav-item:hover { background: var(--acc-bg); color: var(--tx2); border-color: var(--bd2); }
+.nav-item:hover { background: var(--acc-bg); color: var(--tx); border-color: var(--bd2); }
 .nav-item.on {
   background: var(--acc-bg); color: var(--acc);
   border-color: rgba(0,255,102,.3);
   box-shadow: 0 0 10px rgba(0,255,102,.12);
 }
-.nav-icon { font-size: 16px; line-height: 1; }
-.nav-lbl  { font-size: 8px; text-transform: uppercase; letter-spacing: .4px; font-weight: 700; }
+.nav-icon { font-size: 17px; line-height: 1; }
+.nav-lbl  { font-size: 9px; text-transform: uppercase; letter-spacing: .4px; font-weight: 700; }
 .nav-badge {
   position: absolute; top: 4px; right: 4px;
   min-width: 14px; height: 14px;
@@ -272,6 +272,11 @@ body {
 @keyframes pulse { 0%,100%{opacity:1} 50%{opacity:.4} }
 .conn-meta { font-size: 10px; color: var(--tx3); display: flex; gap: 10px; flex-wrap: wrap; }
 .conn-meta b { color: var(--tx2); }
+.conn-desc {
+  font-size: 10px; color: var(--tx2); line-height: 1.5;
+  padding: 6px 8px; border-radius: var(--r2);
+  background: rgba(255,255,255,.03); border: 1px solid var(--bd);
+}
 .conn-actions { display: flex; gap: 5px; flex-wrap: wrap; }
 .hb-row { display: flex; align-items: center; gap: 5px; font-size: 10px; color: var(--tx2); }
 .hb-row input[type=number] {
@@ -693,7 +698,7 @@ body {
 details summary { cursor: pointer; font-size: 12px; color: var(--acc); user-select: none; }
 
 /* ── NAV GROUPS ── */
-.nav-grp { font-size: 7px; color: var(--tx3); text-transform: uppercase; letter-spacing: .6px; font-weight: 700; margin: 4px 0 2px; }
+.nav-grp { font-size: 8px; color: #7d8590; text-transform: uppercase; letter-spacing: .6px; font-weight: 700; margin: 5px 0 2px; }
 
 /* ── TOOL WORKSPACE (SQL / SEARCH) ── */
 #tool-workspace { display: none; flex: 1; overflow: hidden; }

@@ -507,6 +507,14 @@ function renderConnTab() {
         <span>发 <b>${info.stats.send}</b> 条</span>
       </div>`;
 
+    // 角色说明 —— 让用户明白这条连接是什么、能做什么
+    if (isActive) {
+      html += `<div class="conn-desc">🔌 你从面板主动建立的连接 —— 可收发消息、配置心跳与自动重连。</div>`;
+    } else {
+      html += `<div class="conn-desc">💉 网页自身建立、已被监听的连接（只读）—— 可查看其全部收发帧，但无法代它发包。</div>`;
+      html += `<div class="conn-actions"><button class="btn primary" data-action="view-msg" data-connid="${connId}">查看消息</button></div>`;
+    }
+
     if (isActive) {
       // 操作按钮
       html += `<div class="conn-actions">`;
@@ -1527,6 +1535,12 @@ function bindUI() {
     var connId = btn.dataset.connid;
     if (action === 'new-conn')  { openNewConnModal(); }
     if (action === 'set-active'){ setActiveConn(connId); switchLeftTab('msg'); }
+    if (action === 'view-msg'){
+      var sel = document.getElementById('conn-select');
+      if (sel) sel.value = connId;     // 把消息列表过滤到该连接
+      applyFilter();
+      switchLeftTab('msg');
+    }
     if (action === 'disconnect'){ disconnectConn(connId); }
     if (action === 'reconnect') { reconnectConn(connId); }
   });
