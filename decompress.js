@@ -17,8 +17,11 @@ async function decompressWith(bytes, format) {
   const writer = ds.writable.getWriter();
   const reader = ds.readable.getReader();
 
-  writer.write(new Uint8Array(bytes));
-  writer.close();
+  // 格式猜错时 write/close 的 promise 会 reject；必须吞掉，否则会变成
+  // "Uncaught (in promise) TypeError: incorrect header check"。
+  // 真正的错误仍由下方 reader.read() 抛出，交给 autoDecompress 的 try/catch 处理。
+  writer.write(new Uint8Array(bytes)).catch(() => {});
+  writer.close().catch(() => {});
 
   const chunks = [];
   while (true) {
