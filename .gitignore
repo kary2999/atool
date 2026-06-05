@@ -1,0 +1,6 @@
+# Claude Code 内部工作目录
+.claude/worktrees/
+
+# macOS
+.DS_Store
+**/.DS_Store

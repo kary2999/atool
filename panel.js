@@ -448,6 +448,29 @@ function switchLeftTab(name) {
   lTab = name;
   document.querySelectorAll('.nav-item').forEach(t => t.classList.remove('on'));
   document.getElementById('ltab-' + name).classList.add('on');
+
+  // 工具模式（SQL / 检索 / 二维码 / JSON / 时间 / 对比）：整块替换 col2+col3，隐藏 WS 工作区
+  const TOOL_TABS = ['sql', 'search', 'qr', 'json', 'time', 'diff'];
+  const toolMode = TOOL_TABS.includes(name);
+  const cpanel = document.getElementById('cpanel');
+  const detail = document.getElementById('detail-panel');
+  const toolWs = document.getElementById('tool-workspace');
+  const toolbar = document.getElementById('toolbar');
+  if (toolMode) {
+    cpanel.style.display = 'none';
+    detail.style.display = 'none';
+    if (toolbar) toolbar.style.display = 'none';
+    toolWs.classList.add('show');
+    document.querySelectorAll('.tool-pane').forEach(p => p.classList.remove('show'));
+    document.getElementById('tool-' + name).classList.add('show');
+    return;
+  }
+  // WS 模式：恢复原布局
+  cpanel.style.display = 'flex';
+  detail.style.display = 'flex';
+  if (toolbar) toolbar.style.display = 'flex';
+  toolWs.classList.remove('show');
+
   document.querySelectorAll('.cpane').forEach(p => p.classList.remove('show'));
   const paneMap = { msg: 'msg-tab-pane', conn: 'conn-tab-content', send: 'sendtab-content', diag: 'diagtab-content' };
   document.getElementById(paneMap[name]).classList.add('show');

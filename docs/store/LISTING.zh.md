@@ -86,16 +86,4 @@ WS Inspector 是一款专为 Chrome 打造的全功能 WebSocket 调试扩展。
 7. 使用 ⚡ 诊断 tab 检测 WSS 端点是否可达
 ```
 
----
-
-## 关键词建议
-
-`WebSocket` `WS调试` `抓包` `WebSocket Inspector` `开发者工具` `gzip解压` `实时消息` `协议调试` `ws抓包` `WSS诊断`
-
----
-
-## 一句话推广文案
-
-```
-WS Inspector：让 WebSocket 帧无处遁形
-```
+<!-- ⚠️ 关键词区块已删除，禁止粘贴到商店任何字段，否则违反 Google 政策 -->

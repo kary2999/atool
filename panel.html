@@ -692,6 +692,169 @@ body {
 
 details summary { cursor: pointer; font-size: 12px; color: var(--acc); user-select: none; }
 
+/* ── NAV GROUPS ── */
+.nav-grp { font-size: 7px; color: var(--tx3); text-transform: uppercase; letter-spacing: .6px; font-weight: 700; margin: 4px 0 2px; }
+
+/* ── TOOL WORKSPACE (SQL / SEARCH) ── */
+#tool-workspace { display: none; flex: 1; overflow: hidden; }
+#tool-workspace.show { display: flex; }
+.tool-pane { display: none; flex: 1; overflow: hidden; }
+.tool-pane.show { display: flex; }
+
+.tcol-form {
+  width: 360px; flex-shrink: 0; display: flex; flex-direction: column;
+  border-right: 1px solid var(--bd); background: var(--surf); overflow: hidden;
+}
+.tcol-out { flex: 1; display: flex; flex-direction: column; overflow: hidden; background: var(--bg1); }
+
+.tool-head {
+  display: flex; align-items: center; justify-content: space-between;
+  padding: 0 12px; height: 32px; background: var(--bg2);
+  border-bottom: 1px solid var(--bd); flex-shrink: 0;
+}
+.tool-head-title { font-size: 10px; font-weight: 700; text-transform: uppercase; letter-spacing: .6px; color: var(--acc2); }
+.tool-head-meta  { font-size: 10px; color: var(--tx3); font-family: var(--mono); }
+
+.tool-form-body { flex: 1; overflow-y: auto; padding: 12px; display: flex; flex-direction: column; gap: 10px; }
+
+.tseg { display: flex; }
+.tseg button {
+  flex: 1; height: 28px; font-size: 10px; font-weight: 700;
+  text-transform: uppercase; letter-spacing: .3px;
+  border: 1px solid var(--bd2); background: var(--bg2); color: var(--tx3); cursor: pointer;
+}
+.tseg button:first-child { border-radius: var(--r2) 0 0 var(--r2); }
+.tseg button:last-child  { border-radius: 0 var(--r2) var(--r2) 0; border-left: 0; }
+.tseg button.on { background: var(--acc); color: #000; border-color: var(--acc); }
+
+.tfld { display: flex; flex-direction: column; gap: 4px; }
+.tfld label { font-size: 9px; font-weight: 700; color: var(--tx3); text-transform: uppercase; letter-spacing: .4px; }
+.tfld input, .tfld textarea {
+  width: 100%; padding: 7px 9px; font-size: 11px; font-family: var(--mono);
+  border: 1px solid var(--bd2); border-radius: var(--r2);
+  background: var(--bg2); color: var(--tx); outline: none;
+  transition: border-color .1s, box-shadow .1s;
+}
+.tfld input:focus, .tfld textarea:focus { border-color: var(--acc); box-shadow: 0 0 0 2px var(--acc-bg); }
+.tfld textarea { resize: vertical; min-height: 64px; line-height: 1.55; }
+.tfld-row { display: flex; gap: 8px; }
+.tfld-row .tfld { flex: 1; }
+
+.tgen-btn {
+  height: 34px; flex-shrink: 0;
+  background: var(--acc); color: #000; border: none; border-radius: var(--r2);
+  font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: .5px;
+  cursor: pointer; box-shadow: 0 0 12px rgba(0,255,102,.25);
+}
+.tgen-btn:hover { background: var(--acc2); }
+.tgen-btn:disabled { opacity: .45; cursor: not-allowed; box-shadow: none; }
+
+.tprog { height: 4px; background: var(--bg3); border-radius: 100px; overflow: hidden; display: none; }
+.tprog.show { display: block; }
+.tprog > i { display: block; height: 100%; width: 0%; background: linear-gradient(90deg, var(--acc), var(--cya)); transition: width .2s; }
+.tstatus { font-size: 10px; color: var(--tx3); min-height: 14px; }
+.tstatus.ok  { color: var(--acc); }
+.tstatus.err { color: var(--red); }
+
+/* output tabs (reuse detail-tabs look) */
+.tout-tabs {
+  display: flex; align-items: center; background: var(--bg0);
+  border-bottom: 1px solid var(--bd); height: 32px; padding: 0 8px; gap: 2px; flex-shrink: 0;
+}
+.tout-tab {
+  padding: 0 11px; height: 100%; display: flex; align-items: center;
+  font-size: 10px; color: var(--tx3); cursor: pointer;
+  border-bottom: 2px solid transparent; text-transform: uppercase; letter-spacing: .5px;
+}
+.tout-tab.on { color: var(--acc); border-bottom-color: var(--acc); }
+.tout-copy {
+  margin-left: auto; height: 22px; padding: 0 10px; font-size: 9px; font-weight: 700;
+  border: 1px solid var(--bd2); border-radius: var(--r2);
+  background: transparent; color: var(--acc); text-transform: uppercase; letter-spacing: .4px; cursor: pointer;
+}
+.tout-copy:hover { background: var(--acc-bg); }
+.tout-body { flex: 1; overflow: auto; }
+.tout-pane { display: none; }
+.tout-pane.show { display: block; }
+.tout-body pre {
+  font-family: var(--mono); font-size: 11px; line-height: 1.7;
+  white-space: pre-wrap; word-break: break-all; padding: 12px 14px; color: var(--tx);
+}
+.tout-hint { height: 100%; display: flex; align-items: center; justify-content: center; color: var(--tx3); font-style: italic; font-size: 12px; }
+/* SQL syntax highlight */
+.sql-kw  { color: var(--cya); }
+.sql-str { color: var(--amb); }
+.sql-tbl { color: var(--acc); }
+.sql-num { color: #ff8080; }
+/* kv table for search detail */
+.kvtable { width: 100%; border-collapse: collapse; font-size: 11px; }
+.kvtable td { padding: 5px 12px; border-bottom: 1px solid var(--bd); }
+.kvtable td:first-child { color: var(--tx2); font-family: var(--mono); width: 70px; white-space: nowrap; }
+.kvtable td:last-child  { color: var(--tx); font-family: var(--mono); word-break: break-all; }
+
+/* select in tool forms */
+.tfld-select {
+  width: 100%; height: 30px; padding: 0 8px; font-size: 11px; font-family: var(--ui);
+  border: 1px solid var(--bd2); border-radius: var(--r2);
+  background: var(--bg2); color: var(--tx); outline: none; cursor: pointer;
+}
+.tfld-select:focus { border-color: var(--acc); }
+
+/* JSON tool */
+.json-btn {
+  height: 24px; padding: 0 10px; font-size: 10px; font-weight: 700;
+  border: 1px solid var(--bd2); border-radius: var(--r2);
+  background: transparent; color: var(--tx2); cursor: pointer; transition: all .1s;
+}
+.json-btn:hover { border-color: var(--acc); color: var(--acc); background: var(--acc-bg); }
+#json-out pre, #time-out pre { font-family: var(--mono); font-size: 11px; line-height: 1.7; white-space: pre-wrap; word-break: break-all; padding: 12px 14px; color: var(--tx); }
+.json-err { color: var(--red); padding: 12px 14px; font-family: var(--mono); font-size: 11px; line-height: 1.6; }
+
+/* QR tool */
+#qr-out img { image-rendering: pixelated; background: #fff; padding: 10px; border-radius: 4px; box-shadow: 0 4px 20px rgba(0,0,0,.4); }
+.qr-wrap { display: flex; flex-direction: column; align-items: center; gap: 10px; }
+.qr-size { font-size: 10px; color: var(--tx3); font-family: var(--mono); }
+
+/* time table — 更大字号、更清晰对比 */
+#time-out .kvtable { font-size: 13px; }
+#time-out .kvtable td { padding: 11px 16px; }
+#time-out .kvtable td:first-child { color: var(--tx2); font-weight: 600; width: 150px; }
+#time-out .kvtable td:last-child { display: flex; align-items: center; justify-content: space-between; gap: 8px; color: var(--tx); }
+#time-out .kvtable td:last-child span { font-size: 14px; letter-spacing: .3px; }
+.time-load {
+  height: 24px; padding: 0 12px; font-size: 11px; font-weight: 700; flex-shrink: 0;
+  border: 1px solid var(--bd2); border-radius: var(--r2);
+  background: var(--bg3); color: var(--tx2); cursor: pointer;
+}
+.time-load:hover { border-color: var(--acc); color: var(--acc); background: var(--acc-bg); }
+
+/* diff */
+.diff-line { display: flex; font-family: var(--mono); font-size: 11px; line-height: 1.55; white-space: pre-wrap; word-break: break-all; }
+.diff-gutter { flex-shrink: 0; width: 26px; text-align: center; color: var(--tx3); user-select: none; border-right: 1px solid var(--bd); margin-right: 8px; }
+.diff-line.add { background: rgba(0,255,102,.08); }
+.diff-line.add .diff-gutter { color: var(--acc); }
+.diff-line.del { background: rgba(255,85,85,.1); }
+.diff-line.del .diff-gutter { color: var(--red); }
+.diff-line.same { color: var(--tx2); }
+.diff-text { flex: 1; padding-right: 10px; }
+.diff-line.add .diff-text { color: var(--acc); }
+.diff-line.del .diff-text { color: #ff9a9a; }
+
+/* search result rows */
+.sr-list { flex: 1; overflow-y: auto; }
+.sr-row {
+  display: flex; flex-direction: column; gap: 4px;
+  padding: 8px 12px; border-bottom: 1px solid #111720; cursor: pointer;
+}
+.sr-row:hover { background: rgba(255,255,255,.02); }
+.sr-row.on { background: var(--acc-bg); border-left: 2px solid var(--acc); padding-left: 10px; }
+.sr-tags { display: flex; gap: 5px; align-items: center; flex-wrap: wrap; }
+.sr-tag { font-size: 8px; font-weight: 700; padding: 1px 6px; border-radius: 10px; background: rgba(0,255,102,.18); color: #93e9b5; }
+.sr-tag.cya { background: rgba(88,217,247,.18); color: var(--cya); }
+.sr-prev { font-size: 11px; color: var(--tx2); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.sr-hl { background: var(--yel); color: #000; border-radius: 2px; padding: 0 1px; }
+.sr-empty { text-align: center; padding: 30px 16px; color: var(--tx3); font-size: 12px; font-style: italic; }
+
 /* scrollbars */
 ::-webkit-scrollbar { width: 4px; height: 4px; }
 ::-webkit-scrollbar-track { background: transparent; }
@@ -747,6 +910,7 @@ details summary { cursor: pointer; font-size: 12px; color: var(--acc); user-sele
 
   <!-- ── COL 1: ICON NAV ── -->
   <div class="nav">
+    <div class="nav-grp">抓包</div>
     <div class="nav-item on" id="ltab-msg">
       <span class="nav-icon">▤</span>
       <span class="nav-lbl">消息</span>
@@ -760,11 +924,36 @@ details summary { cursor: pointer; font-size: 12px; color: var(--acc); user-sele
       <span class="nav-icon">⚡</span>
       <span class="nav-lbl">诊断</span>
     </div>
-    <div class="nav-sep"></div>
     <div class="nav-item" id="ltab-conn">
       <span class="nav-icon">⛓</span>
       <span class="nav-lbl">连接</span>
       <span class="nav-badge" id="tab-conn-cnt"></span>
+    </div>
+    <div class="nav-sep"></div>
+    <div class="nav-grp">工具</div>
+    <div class="nav-item" id="ltab-sql">
+      <span class="nav-icon">⛁</span>
+      <span class="nav-lbl">SQL</span>
+    </div>
+    <div class="nav-item" id="ltab-search">
+      <span class="nav-icon">⌕</span>
+      <span class="nav-lbl">检索</span>
+    </div>
+    <div class="nav-item" id="ltab-qr">
+      <span class="nav-icon">▦</span>
+      <span class="nav-lbl">二维码</span>
+    </div>
+    <div class="nav-item" id="ltab-json">
+      <span class="nav-icon">❴❵</span>
+      <span class="nav-lbl">JSON</span>
+    </div>
+    <div class="nav-item" id="ltab-time">
+      <span class="nav-icon">◷</span>
+      <span class="nav-lbl">时间</span>
+    </div>
+    <div class="nav-item" id="ltab-diff">
+      <span class="nav-icon">⇄</span>
+      <span class="nav-lbl">对比</span>
     </div>
   </div>
 
@@ -911,6 +1100,204 @@ details summary { cursor: pointer; font-size: 12px; color: var(--acc); user-sele
     </div>
   </div>
 
+  <!-- ── TOOL WORKSPACE (SQL 生成 / 检索) ── -->
+  <div id="tool-workspace">
+
+    <!-- SQL 生成 pane -->
+    <div class="tool-pane" id="tool-sql">
+      <div class="tcol-form">
+        <div class="tool-head">
+          <span class="tool-head-title">SQL 生成</span>
+          <span class="tool-head-meta" id="sql-meta">18 语言</span>
+        </div>
+        <div class="tool-form-body">
+          <div class="tseg">
+            <button class="on" id="sql-mode-lang" data-mode="lang">static_lang</button>
+            <button id="sql-mode-error" data-mode="error">lang_error</button>
+          </div>
+
+          <!-- static_lang fields -->
+          <div id="sql-fields-lang">
+            <div class="tfld" style="margin-bottom:10px"><label>lang_tag</label><input id="sql-lang_tag" value="lang_change_tag"></div>
+            <div class="tfld"><label>type</label><input id="sql-type" type="number" value="1"></div>
+          </div>
+
+          <!-- lang_error fields -->
+          <div id="sql-fields-error" style="display:none">
+            <div class="tfld-row" style="margin-bottom:10px">
+              <div class="tfld"><label>source</label><input id="sql-source" type="number" value="11"></div>
+              <div class="tfld"><label>error_tag</label><input id="sql-tag" value="300300109"></div>
+            </div>
+            <div class="tfld-row">
+              <div class="tfld"><label>error_level</label><input id="sql-level" type="number" value="1"></div>
+              <div class="tfld"><label>extend</label><input id="sql-extend" value=""></div>
+            </div>
+          </div>
+
+          <div class="tfld"><label>zh_CN 源文案</label><textarea id="sql-zh" placeholder="输入中文文案…"></textarea></div>
+          <button class="tgen-btn" id="sql-gen-btn">▶ 翻译并生成 SQL</button>
+          <div class="tprog" id="sql-prog"><i></i></div>
+          <div class="tstatus" id="sql-status"></div>
+        </div>
+      </div>
+      <div class="tcol-out">
+        <div class="tout-tabs">
+          <div class="tout-tab on" data-tab="sql">⛁ SQL</div>
+          <div class="tout-tab" data-tab="table">📊 译文表</div>
+          <button class="tout-copy" id="sql-copy-btn">📋 复制</button>
+        </div>
+        <div class="tout-body">
+          <div class="tout-pane show" id="sql-out-sql"><div class="tout-hint">填写左侧表单后点击「翻译并生成 SQL」</div></div>
+          <div class="tout-pane" id="sql-out-table"></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- 检索 pane -->
+    <div class="tool-pane" id="tool-search">
+      <div class="tcol-form">
+        <div class="tool-head">
+          <span class="tool-head-title">检索结果</span>
+          <span class="tool-head-meta" id="search-meta"></span>
+        </div>
+        <div style="padding:10px 12px;border-bottom:1px solid var(--bd);background:var(--bg2);flex-shrink:0">
+          <div class="tfld" style="margin-bottom:7px">
+            <label>粘贴 INSERT SQL</label>
+            <textarea id="search-sql" style="min-height:70px;background:var(--bg1)" placeholder="INSERT INTO `static_lang_error` (...) VALUES ...;"></textarea>
+          </div>
+          <div style="display:flex;gap:6px">
+            <input id="search-kw" placeholder="error_tag / source / 文案…" style="flex:1;height:28px;padding:0 9px;font-size:11px;border:1px solid var(--bd2);border-radius:var(--r2);background:var(--bg1);color:var(--tx);outline:none">
+            <button class="tgen-btn" id="search-parse-btn" style="height:28px;width:auto;padding:0 12px;font-size:9px;box-shadow:none">解析</button>
+          </div>
+        </div>
+        <div class="sr-list" id="search-results">
+          <div class="sr-empty">粘贴 SQL 后点击「解析」</div>
+        </div>
+      </div>
+      <div class="tcol-out">
+        <div class="tout-tabs">
+          <div class="tout-tab on" data-tab="sql">⛁ 单条 SQL</div>
+          <div class="tout-tab" data-tab="fields">📊 字段</div>
+          <button class="tout-copy" id="search-copy-btn">📋 复制此条</button>
+        </div>
+        <div class="tout-body">
+          <div class="tout-pane show" id="search-out-sql"><div class="tout-hint">从左侧选择一条记录查看详情</div></div>
+          <div class="tout-pane" id="search-out-fields"></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- 二维码 pane -->
+    <div class="tool-pane" id="tool-qr">
+      <div class="tcol-form">
+        <div class="tool-head"><span class="tool-head-title">二维码生成</span></div>
+        <div class="tool-form-body">
+          <div class="tfld"><label>文本 / 链接</label><textarea id="qr-text" style="min-height:120px" placeholder="https://example.com 或任意文本…">https://app.hxexchge.com/</textarea></div>
+          <div class="tfld-row">
+            <div class="tfld"><label>纠错级别</label>
+              <select id="qr-ecc" class="tfld-select">
+                <option value="L">L（7%）</option>
+                <option value="M" selected>M（15%）</option>
+                <option value="Q">Q（25%）</option>
+                <option value="H">H（30%）</option>
+              </select>
+            </div>
+            <div class="tfld"><label>像素大小</label><input id="qr-cell" type="number" value="6" min="2" max="20"></div>
+          </div>
+          <button class="tgen-btn" id="qr-gen-btn">▶ 生成二维码</button>
+          <div class="tstatus" id="qr-status"></div>
+        </div>
+      </div>
+      <div class="tcol-out">
+        <div class="tout-tabs">
+          <div class="tout-tab on">⬛ 二维码</div>
+          <button class="tout-copy" id="qr-download-btn">⬇ 下载 PNG</button>
+        </div>
+        <div class="tout-body" id="qr-out" style="display:flex;align-items:center;justify-content:center;padding:20px">
+          <div class="tout-hint">输入文本后点击「生成二维码」</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- JSON pane -->
+    <div class="tool-pane" id="tool-json">
+      <div class="tcol-form">
+        <div class="tool-head"><span class="tool-head-title">JSON 输入</span><span class="tool-head-meta" id="json-meta"></span></div>
+        <div style="padding:8px 12px;border-bottom:1px solid var(--bd);background:var(--bg2);flex-shrink:0;display:flex;flex-wrap:wrap;gap:5px">
+          <button class="json-btn" data-act="format">格式化</button>
+          <button class="json-btn" data-act="min">压缩</button>
+          <button class="json-btn" data-act="strip">去注释</button>
+          <button class="json-btn" data-act="sort">排序键</button>
+          <button class="json-btn" data-act="escape">转义</button>
+          <button class="json-btn" data-act="unescape">去转义</button>
+        </div>
+        <textarea id="json-input" style="flex:1;border:none;border-radius:0;background:var(--bg1);resize:none;font-family:var(--mono);font-size:11px;line-height:1.6;padding:10px 12px;color:var(--tx);outline:none" placeholder='{"a":1, /* 注释 */ "b":[2,3]}'></textarea>
+      </div>
+      <div class="tcol-out">
+        <div class="tout-tabs">
+          <div class="tout-tab on">✨ 结果</div>
+          <button class="tout-copy" id="json-copy-btn">📋 复制</button>
+        </div>
+        <div class="tout-body">
+          <div class="tout-pane show" id="json-out"><div class="tout-hint">在左侧输入 JSON 后点击上方按钮</div></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- 时间日期 pane -->
+    <div class="tool-pane" id="tool-time">
+      <div class="tcol-form">
+        <div class="tool-head"><span class="tool-head-title">时间日期</span></div>
+        <div class="tool-form-body">
+          <div class="tfld"><label>时区</label>
+            <select id="time-tz" class="tfld-select"></select>
+          </div>
+          <div class="tfld">
+            <label>输入（时间戳 / 日期字符串）</label>
+            <input id="time-input" placeholder="1780383023 或 2026-06-02 15:50:23">
+          </div>
+          <div style="display:flex;gap:7px">
+            <button class="tgen-btn" id="time-now-btn" style="flex:1">当前时间</button>
+            <button class="tgen-btn" id="time-parse-btn" style="flex:1;background:var(--acc-bg);color:var(--acc);box-shadow:none;border:1px solid rgba(0,255,102,.4)">解析</button>
+          </div>
+          <div class="tstatus" id="time-status"></div>
+        </div>
+      </div>
+      <div class="tcol-out">
+        <div class="tout-tabs"><div class="tout-tab on">📅 换算结果</div></div>
+        <div class="tout-body" id="time-out"><div class="tout-hint">输入时间戳或日期后点击「解析」</div></div>
+      </div>
+    </div>
+
+    <!-- 文本对比 pane -->
+    <div class="tool-pane" id="tool-diff">
+      <div class="tcol-form" style="width:420px">
+        <div class="tool-head"><span class="tool-head-title">文本对比</span></div>
+        <div style="flex:1;display:flex;flex-direction:column;overflow:hidden">
+          <div style="flex:1;display:flex;flex-direction:column;border-bottom:1px solid var(--bd);min-height:0">
+            <div style="padding:5px 12px;font-size:9px;font-weight:700;color:var(--tx3);text-transform:uppercase;letter-spacing:.4px;background:var(--bg2)">原文 A</div>
+            <textarea id="diff-a" style="flex:1;border:none;border-radius:0;background:var(--bg1);resize:none;font-family:var(--mono);font-size:11px;line-height:1.55;padding:8px 12px;color:var(--tx);outline:none" placeholder="粘贴原始文本…"></textarea>
+          </div>
+          <div style="flex:1;display:flex;flex-direction:column;min-height:0">
+            <div style="padding:5px 12px;font-size:9px;font-weight:700;color:var(--tx3);text-transform:uppercase;letter-spacing:.4px;background:var(--bg2)">对比 B</div>
+            <textarea id="diff-b" style="flex:1;border:none;border-radius:0;background:var(--bg1);resize:none;font-family:var(--mono);font-size:11px;line-height:1.55;padding:8px 12px;color:var(--tx);outline:none" placeholder="粘贴对比文本…"></textarea>
+          </div>
+        </div>
+        <div style="padding:8px 12px;border-top:1px solid var(--bd);background:var(--bg2);flex-shrink:0">
+          <button class="tgen-btn" id="diff-run-btn" style="width:100%">▶ 对比</button>
+        </div>
+      </div>
+      <div class="tcol-out">
+        <div class="tout-tabs">
+          <div class="tout-tab on">⇄ 差异</div>
+          <span class="tout-head-meta" id="diff-meta" style="margin-left:auto;padding-right:10px"></span>
+        </div>
+        <div class="tout-body" id="diff-out"><div class="tout-hint">在左侧粘贴两段文本后点击「对比」</div></div>
+      </div>
+    </div>
+
+  </div>
+
 </div><!-- #main -->
 
 <!-- ═══ RIGHT-CLICK MENU ════════════════════════════════════════ -->
@@ -1044,6 +1431,9 @@ details summary { cursor: pointer; font-size: 12px; color: var(--acc); user-sele
 </div>
 
 <script src="decompress.js"></script>
+<script src="lib/qrcode.js"></script>
 <script src="panel.js"></script>
+<script src="sql-tools.js"></script>
+<script src="tools.js"></script>
 </body>
 </html>
