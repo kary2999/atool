@@ -3,109 +3,114 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
-<title>Atool — WebSocket Debugger for Chrome</title>
-<meta name="description" content="Intercept, inspect and send WebSocket frames directly in Chrome. Auto-decompress gzip/deflate, JSON syntax highlight, dark theme, WSS diagnostics, send templates.">
+<title>Atool — WebSocket Inspector + Dev Toolbox for Chrome</title>
+<meta name="description" content="Inspect WebSocket frames in Chrome and reach for a built-in dev toolbox: multi-language SQL generator, QR codes, JSON formatter, timestamp converter, text diff. Light, clean, open source.">
 <style>
 :root {
-  --bg: #0d1117; --bg2: #161b22; --bd: #21262d;
-  --tx: #e2e8f0; --tx2: #8b949e; --acc: #00ff66; --acc2: #00cc55;
-  --red: #ff5555; --cya: #58d9f7; --amb: #e2c08d;
+  --bg: #ffffff; --bg2: #f6f8fa; --bg3: #eef1f4; --bd: #d8dee4; --bd2: #c2c9d1;
+  --tx: #1f2328; --tx2: #57606a; --acc: #2563eb; --acc2: #1d4ed8;
+  --red: #cf222e; --cya: #0891b2; --amb: #9a6700;
 }
 * { box-sizing: border-box; margin: 0; padding: 0; }
-body { background: var(--bg); color: var(--tx); font-family: -apple-system,'Segoe UI',system-ui,sans-serif; font-size: 15px; line-height: 1.6; }
-
+body { background: var(--bg); color: var(--tx); font-family: -apple-system,'Segoe UI','PingFang SC',system-ui,sans-serif; font-size: 15px; line-height: 1.6; }
 a { color: var(--acc); text-decoration: none; }
 a:hover { text-decoration: underline; }
 
 /* NAV */
 nav {
-  background: #060809; border-bottom: 1px solid var(--bd);
+  background: #fff; border-bottom: 1px solid var(--bd);
   display: flex; align-items: center; justify-content: space-between;
-  padding: 0 40px; height: 56px; position: sticky; top: 0; z-index: 10;
+  padding: 0 40px; height: 60px; position: sticky; top: 0; z-index: 10;
 }
-.nav-logo { font-size: 16px; font-weight: 700; color: var(--tx); display: flex; align-items: center; gap: 10px; }
-.nav-logo span { color: var(--acc); }
-.nav-links { display: flex; gap: 28px; font-size: 13px; color: var(--tx2); }
+.nav-logo { font-size: 18px; font-weight: 800; color: var(--tx); display: flex; align-items: center; gap: 11px; letter-spacing: -.5px; }
+.logo-mark { width: 30px; height: 30px; border-radius: 8px; background: linear-gradient(135deg,#2563eb,#1d4ed8); display: flex; align-items: center; justify-content: center; color: #fff; font-weight: 800; font-family: Georgia, serif; font-size: 19px; box-shadow: 0 3px 10px rgba(37,99,235,.3); }
+.nav-links { display: flex; gap: 28px; font-size: 14px; }
 .nav-links a { color: var(--tx2); }
 .nav-links a:hover { color: var(--tx); text-decoration: none; }
 .badge-store {
   display: inline-flex; align-items: center; gap: 6px;
-  padding: 6px 14px; border-radius: 4px;
-  background: var(--acc); color: #000; font-size: 13px; font-weight: 700;
-  box-shadow: 0 0 16px rgba(0,255,102,.3);
+  padding: 7px 16px; border-radius: 7px;
+  background: var(--acc); color: #fff; font-size: 14px; font-weight: 700;
+  box-shadow: 0 4px 14px rgba(37,99,235,.3);
 }
 .badge-store:hover { background: var(--acc2); text-decoration: none; }
 
 /* HERO */
 .hero {
-  text-align: center; padding: 80px 40px 60px;
+  text-align: center; padding: 84px 40px 64px;
+  background: linear-gradient(180deg,#f7f9fc,#ffffff);
   border-bottom: 1px solid var(--bd);
 }
-.hero h1 { font-size: 42px; font-weight: 800; letter-spacing: -1px; margin-bottom: 16px; }
+.hero h1 { font-size: 44px; font-weight: 800; letter-spacing: -1.5px; margin-bottom: 18px; }
 .hero h1 em { color: var(--acc); font-style: normal; }
-.hero p { font-size: 18px; color: var(--tx2); max-width: 640px; margin: 0 auto 32px; }
+.hero p { font-size: 18px; color: var(--tx2); max-width: 680px; margin: 0 auto 32px; }
 .hero-btns { display: flex; gap: 12px; justify-content: center; flex-wrap: wrap; }
 .btn-primary {
-  padding: 12px 28px; border-radius: 6px;
-  background: var(--acc); color: #000; font-weight: 700; font-size: 15px;
-  box-shadow: 0 0 20px rgba(0,255,102,.3); display: inline-flex; align-items: center; gap: 8px;
+  padding: 13px 28px; border-radius: 8px;
+  background: var(--acc); color: #fff; font-weight: 700; font-size: 15px;
+  box-shadow: 0 6px 18px rgba(37,99,235,.3); display: inline-flex; align-items: center; gap: 8px;
 }
 .btn-primary:hover { background: var(--acc2); text-decoration: none; }
 .btn-ghost {
-  padding: 12px 28px; border-radius: 6px; border: 1px solid var(--bd);
-  color: var(--tx2); font-size: 15px; display: inline-flex; align-items: center; gap: 8px;
+  padding: 13px 28px; border-radius: 8px; border: 1px solid var(--bd);
+  color: var(--tx); font-size: 15px; display: inline-flex; align-items: center; gap: 8px; background: #fff;
 }
-.btn-ghost:hover { border-color: var(--tx2); color: var(--tx); text-decoration: none; }
+.btn-ghost:hover { border-color: var(--acc); color: var(--acc); text-decoration: none; }
+.hero-chips { display: flex; gap: 8px; justify-content: center; flex-wrap: wrap; margin-top: 30px; }
+.chip { font-size: 13px; font-weight: 600; color: var(--tx2); background: #fff; border: 1px solid var(--bd); border-radius: 100px; padding: 5px 14px; }
 
 /* SCREENSHOTS */
-.screenshots { padding: 60px 40px; border-bottom: 1px solid var(--bd); }
-.screenshots h2 { text-align: center; font-size: 26px; font-weight: 700; margin-bottom: 36px; }
-.ss-grid {
-  display: grid; grid-template-columns: 1fr 1fr; gap: 16px; max-width: 1100px; margin: 0 auto;
-}
+.screenshots { padding: 64px 40px; border-bottom: 1px solid var(--bd); background: var(--bg2); }
+.screenshots h2 { text-align: center; font-size: 28px; font-weight: 800; margin-bottom: 38px; letter-spacing: -.5px; }
+.ss-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; max-width: 1100px; margin: 0 auto; }
 .ss-grid img {
-  width: 100%; border-radius: 8px; border: 1px solid var(--bd);
-  box-shadow: 0 8px 32px rgba(0,0,0,.5);
+  width: 100%; border-radius: 10px; border: 1px solid var(--bd);
+  box-shadow: 0 8px 28px rgba(15,23,42,.1);
   transition: transform .2s, box-shadow .2s;
 }
-.ss-grid img:hover { transform: scale(1.02); box-shadow: 0 12px 40px rgba(0,255,102,.08); }
+.ss-grid img:hover { transform: scale(1.02); box-shadow: 0 14px 40px rgba(37,99,235,.15); }
 .ss-grid img:first-child { grid-column: 1 / -1; }
 
 /* FEATURES */
-.features { padding: 60px 40px; border-bottom: 1px solid var(--bd); }
-.features h2 { text-align: center; font-size: 26px; font-weight: 700; margin-bottom: 36px; }
+.features { padding: 64px 40px; border-bottom: 1px solid var(--bd); }
+.features h2 { text-align: center; font-size: 28px; font-weight: 800; margin-bottom: 8px; letter-spacing: -.5px; }
+.features .sub { text-align: center; color: var(--tx2); margin-bottom: 38px; }
 .feat-grid {
   display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
-  gap: 20px; max-width: 1100px; margin: 0 auto;
+  gap: 18px; max-width: 1100px; margin: 0 auto;
 }
 .feat-card {
-  background: var(--bg2); border: 1px solid var(--bd); border-radius: 8px;
+  background: #fff; border: 1px solid var(--bd); border-radius: 12px;
   padding: 24px; display: flex; flex-direction: column; gap: 8px;
+  transition: border-color .15s, box-shadow .15s;
 }
-.feat-icon { font-size: 28px; }
-.feat-card h3 { font-size: 15px; font-weight: 700; color: var(--tx); }
-.feat-card p { font-size: 13px; color: var(--tx2); line-height: 1.55; }
+.feat-card:hover { border-color: var(--acc); box-shadow: 0 6px 20px rgba(37,99,235,.1); }
+.feat-icon { font-size: 26px; }
+.feat-card h3 { font-size: 16px; font-weight: 700; color: var(--tx); }
+.feat-card p { font-size: 13.5px; color: var(--tx2); line-height: 1.55; }
+.feat-card .tag { font-size: 11px; font-weight: 700; color: var(--acc); background: rgba(37,99,235,.08); border-radius: 4px; padding: 1px 7px; align-self: flex-start; }
 
 /* WHAT'S NEW */
-.whatsnew {
-  padding: 60px 40px; border-bottom: 1px solid var(--bd);
-  background: rgba(0,255,102,.025);
-}
-.whatsnew h2 { text-align: center; font-size: 26px; font-weight: 700; margin-bottom: 36px; }
-.changelog { max-width: 680px; margin: 0 auto; display: flex; flex-direction: column; gap: 12px; }
+.whatsnew { padding: 64px 40px; border-bottom: 1px solid var(--bd); background: var(--bg2); }
+.whatsnew h2 { text-align: center; font-size: 28px; font-weight: 800; margin-bottom: 38px; letter-spacing: -.5px; }
+.changelog { max-width: 700px; margin: 0 auto; display: flex; flex-direction: column; gap: 14px; }
 .cl-item { display: flex; gap: 14px; align-items: flex-start; }
 .cl-dot {
-  width: 22px; height: 22px; border-radius: 4px; flex-shrink: 0; margin-top: 2px;
-  background: rgba(0,255,102,.12); border: 1px solid rgba(0,255,102,.4);
+  width: 24px; height: 24px; border-radius: 6px; flex-shrink: 0; margin-top: 1px;
+  background: rgba(37,99,235,.1); border: 1px solid rgba(37,99,235,.35);
   display: flex; align-items: center; justify-content: center;
-  font-size: 11px; font-weight: 700; color: var(--acc);
+  font-size: 12px; font-weight: 700; color: var(--acc);
 }
-.cl-item p { font-size: 14px; color: var(--tx2); }
+.cl-item p { font-size: 14.5px; color: var(--tx2); }
 .cl-item p strong { color: var(--tx); }
+
+/* PRIVACY NOTE */
+.privnote { max-width: 760px; margin: 0 auto; padding: 36px 40px; text-align: center; color: var(--tx2); font-size: 14px; }
+.privnote strong { color: var(--tx); }
 
 /* FOOTER */
 footer {
-  background: #060809; border-top: 1px solid var(--bd);
+  background: #fff; border-top: 1px solid var(--bd);
   padding: 32px 40px; display: flex; align-items: center; justify-content: space-between;
   flex-wrap: wrap; gap: 12px; font-size: 13px; color: var(--tx2);
 }
@@ -113,12 +118,12 @@ footer a { color: var(--tx2); }
 footer a:hover { color: var(--acc); text-decoration: none; }
 
 @media (max-width: 640px) {
-  .hero h1 { font-size: 28px; }
+  .hero h1 { font-size: 30px; }
   .ss-grid { grid-template-columns: 1fr; }
   .ss-grid img:first-child { grid-column: 1; }
   nav { padding: 0 16px; }
   .nav-links { display: none; }
-  .hero, .features, .screenshots, .whatsnew { padding: 40px 16px; }
+  .hero, .features, .screenshots, .whatsnew { padding: 44px 16px; }
   footer { padding: 24px 16px; flex-direction: column; }
 }
 </style>
@@ -126,35 +131,37 @@ footer a:hover { color: var(--acc); text-decoration: none; }
 <body>
 
 <nav>
-  <div class="nav-logo">⚡ WS <span>Inspector</span></div>
+  <div class="nav-logo"><span class="logo-mark">A</span> Atool</div>
   <div class="nav-links">
     <a href="#features">Features</a>
     <a href="#screenshots">Screenshots</a>
     <a href="privacy.html">Privacy</a>
     <a href="https://github.com/kary2999/atool">GitHub</a>
   </div>
-  <a class="badge-store" href="https://chromewebstore.google.com/detail/atool" target="_blank">
-    ＋ Add to Chrome
-  </a>
+  <a class="badge-store" href="https://chromewebstore.google.com/detail/atool" target="_blank">＋ Add to Chrome</a>
 </nav>
 
 <section class="hero">
-  <h1>WebSocket debugging,<br><em>done right.</em></h1>
-  <p>Intercept, inspect and send WebSocket frames directly in Chrome — no proxy, no MITM, no setup. Just install and reload.</p>
+  <h1>WebSocket inspector,<br><em>plus the tools you reach for.</em></h1>
+  <p>Capture and debug WebSocket frames right in Chrome — then generate SQL, QR codes, format JSON, convert timestamps and diff text without leaving the panel. No proxy, no setup. Just install and reload.</p>
   <div class="hero-btns">
-    <a class="btn-primary" href="https://chromewebstore.google.com/detail/atool" target="_blank">
-      🛒 Add to Chrome — Free
-    </a>
-    <a class="btn-ghost" href="https://github.com/kary2999/atool" target="_blank">
-      ⭐ View on GitHub
-    </a>
+    <a class="btn-primary" href="https://chromewebstore.google.com/detail/atool" target="_blank">🛒 Add to Chrome — Free</a>
+    <a class="btn-ghost" href="https://github.com/kary2999/atool" target="_blank">⭐ View on GitHub</a>
+  </div>
+  <div class="hero-chips">
+    <span class="chip">WS capture / decode</span>
+    <span class="chip">SQL gen &amp; search</span>
+    <span class="chip">QR code</span>
+    <span class="chip">JSON</span>
+    <span class="chip">Timestamp</span>
+    <span class="chip">Text diff</span>
   </div>
 </section>
 
 <section class="screenshots" id="screenshots">
   <h2>See it in action</h2>
   <div class="ss-grid">
-    <img src="store/screenshots/01-messages.png" alt="Message list with JSON detail and dark theme">
+    <img src="store/screenshots/01-messages.png" alt="Message list with JSON detail, light theme">
     <img src="store/screenshots/03-send-tab.png" alt="Send tab — connect and send custom payloads">
     <img src="store/screenshots/04-diagnostics.png" alt="WSS Diagnostics — handshake timeline">
     <img src="store/screenshots/05-connections.png" alt="Connections tab — manage all WebSocket connections">
@@ -164,71 +171,60 @@ footer a:hover { color: var(--acc); text-decoration: none; }
 
 <section class="features" id="features">
   <h2>Everything you need</h2>
+  <p class="sub">A WebSocket inspector at its core — with a toolbox of dev utilities bolted right in.</p>
   <div class="feat-grid">
     <div class="feat-card">
+      <span class="tag">CAPTURE</span>
       <div class="feat-icon">🔍</div>
-      <h3>Auto-intercept</h3>
-      <p>Captures every WebSocket connection on the page — including dynamically created ones — the moment you open the panel.</p>
+      <h3>Auto-intercept &amp; decompress</h3>
+      <p>Captures every WebSocket connection on the page — including dynamic ones — and auto-decodes gzip / deflate / deflate-raw by magic bytes. See the real payload, not the blob.</p>
     </div>
     <div class="feat-card">
-      <div class="feat-icon">📦</div>
-      <h3>Auto-decompress</h3>
-      <p>gzip, deflate, deflate-raw — detected by magic bytes, decoded automatically. See the real payload, not the binary blob.</p>
-    </div>
-    <div class="feat-card">
+      <span class="tag">CAPTURE</span>
       <div class="feat-icon">✨</div>
-      <h3>JSON Syntax Highlight</h3>
-      <p>Keys, strings, numbers and booleans each get their own color. With a dedicated Hex view for pure binary frames.</p>
+      <h3>JSON highlight · Hex · Diagnostics</h3>
+      <p>Decoded JSON with syntax highlighting, a dedicated Hex view for binary frames, and a WSS reachability check (TLS handshake / WebSocket upgrade timeline).</p>
     </div>
     <div class="feat-card">
-      <div class="feat-icon">⚡</div>
-      <h3>WSS Diagnostics</h3>
-      <p>Not sure if an endpoint is reachable? Run a TLS handshake / WebSocket upgrade check with per-step timing before writing a single line of code.</p>
-    </div>
-    <div class="feat-card">
+      <span class="tag">CAPTURE</span>
       <div class="feat-icon">⇧</div>
-      <h3>Active Connections</h3>
-      <p>Open your own ws:// / wss:// connections from the panel. Save payloads as local templates and send them in one click.</p>
+      <h3>Send &amp; subscribe</h3>
+      <p>Open your own ws:// / wss:// connections, save payload templates, set heartbeats and auto-reconnect, and auto-send subscribe/auth frames on connect.</p>
     </div>
     <div class="feat-card">
-      <div class="feat-icon">⚙</div>
-      <h3>Subscription Rules</h3>
-      <p>Auto-send auth tokens or subscribe messages the moment a connection opens. Color-highlight matching frames by keyword or regex.</p>
+      <span class="tag">TOOL</span>
+      <div class="feat-icon">⛁</div>
+      <h3>SQL Generator &amp; Search</h3>
+      <p>Type Chinese text, auto-translate to 18 languages and produce <code>static_lang</code> / <code>static_lang_error</code> INSERT SQL. Paste existing INSERTs to filter and inspect rows.</p>
     </div>
     <div class="feat-card">
-      <div class="feat-icon">⌨</div>
-      <h3>Keyboard Navigation</h3>
-      <p>↑ / ↓ to move through the message list. ← / → to switch detail tabs. Stay in flow without reaching for the mouse.</p>
+      <span class="tag">TOOL</span>
+      <div class="feat-icon">▦</div>
+      <h3>QR · JSON · Time · Diff</h3>
+      <p>Generate QR codes (PNG export), format / minify / strip-comments JSON, convert timestamps across timezones, and run a line-by-line text diff — all in the same panel.</p>
     </div>
     <div class="feat-card">
-      <div class="feat-icon">🔒</div>
-      <h3>100% Local &amp; Private</h3>
-      <p>No backend, no analytics, no telemetry. Your WebSocket data never leaves the browser. Fully open source.</p>
+      <span class="tag">UX</span>
+      <div class="feat-icon">🎨</div>
+      <h3>Light, clean UI · two modes</h3>
+      <p>An easy-on-the-eyes light theme with a three-column layout. Use it as a DevTools panel or a docked browser side panel — your choice.</p>
     </div>
   </div>
 </section>
 
 <section class="whatsnew" id="whatsnew">
-  <h2>What's new in v1.2</h2>
+  <h2>What's new in v2.1</h2>
   <div class="changelog">
-    <div class="cl-item">
-      <div class="cl-dot">✦</div>
-      <p><strong>Dark hacker-theme UI</strong> — Three-column layout (icon nav · message list · detail viewer) with a single-row toolbar. Designed for long debugging sessions.</p>
-    </div>
-    <div class="cl-item">
-      <div class="cl-dot">✦</div>
-      <p><strong>WSS Diagnostics tab</strong> — Step-by-step timeline showing the TLS handshake and WebSocket upgrade with per-step timing and history.</p>
-    </div>
-    <div class="cl-item">
-      <div class="cl-dot">✦</div>
-      <p><strong>Local send templates</strong> — Save, load and delete payload presets inside the Send tab without touching the global template manager.</p>
-    </div>
-    <div class="cl-item">
-      <div class="cl-dot">✦</div>
-      <p><strong>Keyboard navigation</strong> — ↑ / ↓ navigates the message list; ← / → cycles through Decoded · Raw · Hex · Info detail tabs.</p>
-    </div>
+    <div class="cl-item"><div class="cl-dot">✦</div><p><strong>Rebrand to Atool + light theme</strong> — A clean, eye-friendly light UI in blue, replacing the old dark palette. New logo and identity.</p></div>
+    <div class="cl-item"><div class="cl-dot">✦</div><p><strong>Dev toolbox</strong> — SQL generator &amp; search, QR codes, JSON tools, timestamp converter and text diff, grouped alongside the WebSocket inspector.</p></div>
+    <div class="cl-item"><div class="cl-dot">✦</div><p><strong>Connections, redesigned</strong> — Each connection shows its role with a one-click "view messages" filter; captured vs. active clearly distinguished.</p></div>
+    <div class="cl-item"><div class="cl-dot">✦</div><p><strong>Leaner permissions</strong> — Settings now use <code>localStorage</code>; the unused <code>storage</code> permission was removed.</p></div>
   </div>
 </section>
+
+<div class="privnote">
+  <p><strong>Privacy-first.</strong> WebSocket capture and the QR / JSON / Time / Diff tools run entirely in your browser — no analytics, no telemetry. The only outbound request is the optional SQL Generator translation, which sends the text you type to Google Translate. Details in the <a href="privacy.html">Privacy Policy</a>.</p>
+</div>
 
 <footer>
   <span>© 2026 Atool · Independent open-source project</span>
