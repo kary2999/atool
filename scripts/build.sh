@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
-# 打包 DevToolbox 扩展为可上架的 zip，版本号取自 manifest.json。
+# 打包 Atool 扩展为可上架的 zip，版本号取自 manifest.json。
 # 只含扩展运行所需文件，排除 git/CI/文档/开发脚本等。
-# 用法：bash scripts/build.sh   →  产出 devtoolbox-v<version>.zip
+# 用法：bash scripts/build.sh   →  产出 atool-v<version>.zip
 set -euo pipefail
 
 cd "$(dirname "$0")/.."
@@ -13,7 +13,7 @@ if [ -z "$VERSION" ]; then
   exit 1
 fi
 
-OUT="devtoolbox-v${VERSION}.zip"
+OUT="atool-v${VERSION}.zip"
 rm -f "$OUT"
 
 # 排除非运行文件：版本控制、CI、Claude 内部、文档、打包脚本、旧 zip、Markdown、图标生成脚本等

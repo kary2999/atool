@@ -5,7 +5,7 @@
 ## Name (≤ 45 chars)
 
 ```
-DevToolbox — WebSocket + Dev Tools
+Atool — WebSocket + Dev Tools
 ```
 
 ## Short description (≤ 132 chars)
@@ -23,9 +23,9 @@ Inspect WebSocket frames plus a built-in toolbox: multi-language SQL gen, QR cod
 ## Detailed description
 
 ```
-DevToolbox is a developer toolbox extension for Chrome.
+Atool is a developer toolbox extension for Chrome.
 Built around a mature WebSocket interceptor/debugger, it bundles the
-small utilities you reach for every day into one dark, three-column panel —
+small utilities you reach for every day into one clean, light three-column panel —
 switch and use, no more jumping between scattered web tools.
 
 ═══════ NEW IN 2.0 — DEV TOOLS GROUP ═══════
@@ -58,7 +58,7 @@ switch and use, no more jumping between scattered web tools.
 
 ═══════ TWO DISPLAY MODES ═══════
 
-① DevTools Panel  (F12 → "DevToolbox" tab)
+① DevTools Panel  (F12 → "Atool" tab)
    Embedded alongside Chrome DevTools Network / Console panels
 
 ② Browser Side Panel  (click toolbar icon)
@@ -85,7 +85,7 @@ switch and use, no more jumping between scattered web tools.
 ═══════ HOW TO USE ═══════
 
 1. Install the extension
-2. Click the toolbar icon for the Side Panel, or press F12 → DevToolbox tab
+2. Click the toolbar icon for the Side Panel, or press F12 → Atool tab
 3. Capture: open any page using WebSocket and reload — frames appear, grouped by connection
 4. Tools: switch SQL / QR / JSON / Time / Diff under the "Tools" group in the left nav
 5. Each tool: input on the left, live results on the right, one-click copy / export

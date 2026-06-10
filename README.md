@@ -1,8 +1,8 @@
-# DevToolbox — WebSocket 抓包 + 开发工具箱
+# Atool — WebSocket 抓包 + 开发工具箱
 
 > 一款面向开发者的 Chrome 扩展：以成熟的 WebSocket 抓包/调试器为核心，
 > 并把日常高频用到的开发小工具（SQL 生成/检索、二维码、JSON、时间日期、文本对比）
-> 收纳进同一个深色三栏面板，切换即用。
+> 收纳进同一个简洁的亮色三栏面板，切换即用。
 
 支持两种打开方式：**DevTools 面板** 与 **浏览器侧栏**。
 
@@ -48,7 +48,7 @@
 
 ### 方式一：下载 Release（推荐普通用户）
 
-1. 前往 [Releases](../../releases) 下载最新的 `devtoolbox-vX.Y.Z.zip`
+1. 前往 [Releases](../../releases) 下载最新的 `atool-vX.Y.Z.zip`
 2. 解压到一个固定目录
 3. Chrome 打开 `chrome://extensions/`，开启右上角 **开发者模式**
 4. 点击 **「加载已解压的扩展程序」**，选择解压后的目录
@@ -56,7 +56,7 @@
 ### 方式二：克隆源码（开发者）
 
 ```bash
-git clone git@github.com:kary2999/ws-inspector.git
+git clone git@github.com:kary2999/atool.git
 # chrome://extensions → 开发者模式 → 加载已解压的扩展程序 → 选择仓库目录
 ```
 
@@ -68,8 +68,8 @@ git clone git@github.com:kary2999/ws-inspector.git
 
 | 模式 | 入口 | 特点 |
 |------|------|------|
-| **浏览器侧栏** | 点击工具栏的 DevToolbox 图标 | 固定在页面右侧，自动跟随标签页切换，无需打开 DevTools |
-| **DevTools 面板** | F12 → 顶部 **DevToolbox** 标签页 | 嵌入开发者工具，与 Network / Console 并列 |
+| **浏览器侧栏** | 点击工具栏的 Atool 图标 | 固定在页面右侧，自动跟随标签页切换，无需打开 DevTools |
+| **DevTools 面板** | F12 → 顶部 **Atool** 标签页 | 嵌入开发者工具，与 Network / Console 并列 |
 
 左侧图标导航分两组：**抓包**（消息/发包/诊断/连接）与 **工具**（SQL/检索/二维码/JSON/时间/对比）。
 
@@ -182,7 +182,7 @@ git clone git@github.com:kary2999/ws-inspector.git
 ## 开发与打包
 
 ```bash
-# 本地打包（按 manifest.json 版本号产出 devtoolbox-v<版本>.zip，仅含运行文件）
+# 本地打包（按 manifest.json 版本号产出 atool-v<版本>.zip，仅含运行文件）
 bash scripts/build.sh
 ```
 
@@ -205,7 +205,7 @@ git tag v2.0.2 && git push origin v2.0.2
 ## 目录结构
 
 ```
-ws-inspector/
+atool/
 ├── manifest.json          扩展清单（MV3）
 ├── background.js          service worker（点击图标开侧栏）
 ├── content-script.js      注入页面、转发 WS 事件

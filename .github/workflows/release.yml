@@ -32,6 +32,6 @@ jobs:
       - name: 发布 Release（附带 zip）
         uses: softprops/action-gh-release@v2
         with:
-          files: devtoolbox-v*.zip
+          files: atool-v*.zip
           generate_release_notes: true
-          name: DevToolbox ${{ github.ref_name }}
+          name: Atool ${{ github.ref_name }}

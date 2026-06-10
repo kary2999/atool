@@ -79,7 +79,7 @@ function updateContextBadge() {
   if (!badge) {
     badge = document.createElement('span');
     badge.id = 'ctx-badge';
-    badge.style.cssText = 'font-size:10px;color:#aaa;margin-left:4px;white-space:nowrap;';
+    badge.style.cssText = 'font-size:10px;color:#57606a;margin-left:4px;white-space:nowrap;';
     document.getElementById('toolbar-actions')?.appendChild(badge);
   }
   const mode = IS_DEVTOOLS ? 'DevTools' : '侧栏';
@@ -395,7 +395,7 @@ function appendEventRow(entry) {
   if (entry.event === 'sys') {
     const list = document.getElementById('msg-list');
     list.insertAdjacentHTML('beforeend',
-      `<div class="msg-row" style="color:#888;font-style:italic" data-id="${entry.id}">
+      `<div class="msg-row" style="color:#57606a;font-style:italic" data-id="${entry.id}">
          <span class="ts">${fmtTs(entry.ts)}</span>
          <span class="prev">${esc(entry.label || '')}</span>
        </div>`);
@@ -499,7 +499,7 @@ function renderConnTab() {
         <span class="conn-type-icon">${isActive ? '🔌' : '💉'}</span>
         <span class="conn-url" title="${esc(info.url)}">${esc(info.url)}</span>
         <span class="status-dot ${dotCls}" title="${statusTxt}"></span>
-        <span style="font-size:10px;color:#888">${statusTxt}</span>
+        <span style="font-size:10px;color:#57606a">${statusTxt}</span>
       </div>
       <div class="conn-meta">
         <span>来源：<b>${isActive?'主动':'页面捕获'}</b></span>
@@ -837,7 +837,7 @@ function toggleRule(id) {
 
 function renderRuleList() {
   const el = document.getElementById('rule-list');
-  if (!rules.length) { el.innerHTML = '<p style="color:#aaa;font-size:12px">暂无订阅规则</p>'; return; }
+  if (!rules.length) { el.innerHTML = '<p style="color:#57606a;font-size:12px">暂无订阅规则</p>'; return; }
   el.innerHTML = rules.map(r => `
     <div class="rule-item ${r.enabled?'':'disabled'}">
       <div class="rule-dot" style="background:${r.color}"></div>
@@ -910,7 +910,7 @@ function useTpl(idx) {
 function renderTplList() {
   const el = document.getElementById('tpl-list');
   if (!el) return;
-  if (!templates.length) { el.innerHTML = '<p style="color:#aaa;font-size:12px">暂无模板</p>'; return; }
+  if (!templates.length) { el.innerHTML = '<p style="color:#57606a;font-size:12px">暂无模板</p>'; return; }
   el.innerHTML = templates.map((t, i) => `
     <div class="tpl-item" data-idx="${i}">
       <span class="tpl-item-name">${esc(t.name)}</span>
@@ -1409,7 +1409,7 @@ function _renderDiagSteps(steps) {
 function _renderDiagHist() {
   const el = document.getElementById('diag-hist');
   if (!diagHistory.length) {
-    el.innerHTML = '<p style="color:#aaa;font-size:11px;text-align:center;padding:10px 0">暂无检测记录</p>';
+    el.innerHTML = '<p style="color:#57606a;font-size:11px;text-align:center;padding:10px 0">暂无检测记录</p>';
     return;
   }
   el.innerHTML = diagHistory.map(h =>

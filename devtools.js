@@ -1,5 +1,5 @@
 chrome.devtools.panels.create(
-  'WS Inspector',
+  'Atool',
   'icons/icon16.png',
   'panel.html',
   () => {}
