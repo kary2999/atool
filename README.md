@@ -33,7 +33,7 @@
 |------|------|------|
 | **抓包** | 消息 | 实时截获页面所有 WebSocket 帧，自动解压 gzip/deflate，按连接分组 |
 | | 发包 | 主动建立 ws:// / wss:// 连接并发送报文，支持模板与定时发送 |
-| | 诊断 | 检测 WSS 端点可达性（DNS → TLS → 握手逐步时间轴） |
+| | 诊断 | 检测 WSS 端点可达性（TLS 握手连通性，逐步耗时时间轴） |
 | | 连接 | 查看所有连接（捕获/主动），心跳、自动重连、订阅规则配置 |
 | **工具** | SQL 生成 | 中文文案翻译为 18 语言并生成 `static_lang` / `static_lang_error` INSERT SQL |
 | | SQL 检索 | 粘贴 INSERT 语句，按 source/error_tag/文案检索过滤、查看单条明细 |
@@ -104,7 +104,7 @@ git clone git@github.com:kary2999/atool.git
 
 ![诊断](docs/store/screenshots/04-diagnostics.jpg)
 
-输入 WSS 地址，逐步检测 **DNS 解析 → TLS → 握手** 是否可达，带耗时时间轴与历史记录。
+输入 WSS 地址，逐步检测 **TLS 握手 → WebSocket 升级** 是否可达，带耗时时间轴与历史记录。
 写客户端代码前快速验证端点是否通。
 
 ### 连接

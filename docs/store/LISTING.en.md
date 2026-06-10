@@ -51,7 +51,7 @@ switch and use, no more jumping between scattered web tools.
 ✓ Four detail views: Decoded JSON (syntax highlighted) · Raw · Hex · Info
 ✓ Active connections — open ws:// or wss:// endpoints directly from the panel
 ✓ Heartbeat keep-alive + auto-reconnect with exponential back-off
-✓ WSS Diagnostics — DNS → TLS → handshake step timeline, endpoint reachability
+✓ WSS Diagnostics — TLS / WebSocket upgrade step timeline, endpoint reachability
 ✓ Subscription rules — auto-send frames on connect (auth tokens, subscribe payloads)
 ✓ Message highlighting (keyword / regex / JSON-path), pin, direction filter
 ✓ Send templates, right-click menu (copy / resend / pin / delete), JSON export

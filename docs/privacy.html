@@ -67,11 +67,11 @@ footer a:hover { color: var(--acc); text-decoration: none; }
 
 <div class="wrap">
   <h1>Privacy Policy</h1>
-  <p class="meta">Last updated: 2026-05-20 &nbsp;·&nbsp; Applies to version 1.2.0 and later</p>
+  <p class="meta">Last updated: 2026-06-10 &nbsp;·&nbsp; Applies to version 2.1.0 and later</p>
 
   <div class="no-banner">
     <div class="no-banner-icon">🔒</div>
-    <p><strong>Short version:</strong> Atool collects absolutely no data. Everything stays in your browser. There is no backend, no analytics, and no telemetry of any kind.</p>
+    <p><strong>Short version:</strong> Atool collects no personal data — no backend, no analytics, no telemetry. The only outbound request is the optional SQL Generator translation, which sends the text you type to Google Translate (see §4). Everything else stays in your browser.</p>
   </div>
 
   <h2>1. Developer</h2>
@@ -100,26 +100,36 @@ footer a:hover { color: var(--acc); text-decoration: none; }
     <tr>
       <td>Subscription rules, send templates</td>
       <td>Restored when you reopen the panel</td>
-      <td>Browser localStorage (your device only)</td>
+      <td>Browser localStorage (your device only, no permission required)</td>
+    </tr>
+    <tr>
+      <td>Input of the SQL / JSON / Time / QR / Diff tools</td>
+      <td>Computed live by the tool</td>
+      <td>Browser memory only (not persisted)</td>
     </tr>
   </table>
 
-  <h2>4. When Data Leaves the Browser</h2>
-  <p><strong>Only when you explicitly click "Export JSON"</strong> — this writes the current message log to your local Downloads folder. No data is sent to any server at any point.</p>
-  <p>When you use the "New Connection" feature, the extension establishes a WebSocket connection to an address you type. That outbound connection is your own request to your own target; the extension does not route or log it externally.</p>
+  <h2>4. Third-Party Requests</h2>
+  <p>Atool makes exactly <strong>one</strong> kind of third-party request:</p>
+  <ul>
+    <li>⚠ <strong>The "SQL Generator" multi-language translation</strong>: when you use this tool, the source text you type is sent to <strong>Google Translate's public endpoint (<code>translate.googleapis.com</code>)</strong> to fetch translations. This is required for that feature to work.</li>
+    <li><strong>If you do not use the SQL Generator, the extension makes no outbound third-party requests.</strong></li>
+    <li>Everything else — WebSocket capture / decode / diagnostics / send, and the QR / JSON / Time / Diff tools — is computed locally with no network access. No CDNs, fonts, tracking pixels, or error-reporting services.</li>
+  </ul>
+  <p>When you use "New Connection", the extension opens a WebSocket to an address you type — your own request to your own target; the extension does not route or log it externally.</p>
 
-  <h2>5. Third-Party Requests</h2>
-  <p>Atool makes <strong>no third-party network requests</strong> of its own — no CDNs, no fonts, no tracking pixels, no error-reporting services.</p>
+  <h2>5. When Data Leaves the Browser</h2>
+  <p>Aside from the translation request above, captured data leaves the browser <strong>only when you explicitly click "Export JSON"</strong>, which writes the current message log to your local Downloads folder.</p>
 
   <h2>6. Permissions Explained</h2>
   <table>
     <tr><th>Permission</th><th>Reason</th></tr>
-    <tr><td>storage</td><td>Save subscription rules and send templates to localStorage</td></tr>
-    <tr><td>sidePanel</td><td>Show the debugger panel in the browser's side panel</td></tr>
-    <tr><td>tabs</td><td>Follow the active tab in Side Panel mode</td></tr>
-    <tr><td>Content scripts on &lt;all_urls&gt;</td><td>Users debug WebSocket on arbitrary sites; the domain can't be predicted in advance</td></tr>
+    <tr><td>sidePanel</td><td>Show the tool panel in the browser's side panel</td></tr>
+    <tr><td>Host: <code>https://translate.googleapis.com/*</code></td><td>Only for the SQL Generator's multi-language translation (see §4)</td></tr>
+    <tr><td>Content scripts on &lt;all_urls&gt;</td><td>Users debug WebSocket on arbitrary sites; the domain can't be predicted, used to inject the capture script</td></tr>
   </table>
-  <p>Permissions <strong>not</strong> used: <code>webRequest</code>, <code>cookies</code>, <code>history</code>, <code>identity</code>, remote code execution.</p>
+  <p>Settings are saved via standard <code>localStorage</code> (no <code>storage</code> permission); the side panel reads only the tab ID (a non-sensitive field, no <code>tabs</code> permission).</p>
+  <p>Permissions <strong>not</strong> used: <code>storage</code>, <code>tabs</code>, <code>webRequest</code>, <code>cookies</code>, <code>history</code>, <code>identity</code>, remote code execution.</p>
 
   <h2>7. Children</h2>
   <p>Atool is a developer tool not directed at children. It does not knowingly collect data from anyone.</p>
